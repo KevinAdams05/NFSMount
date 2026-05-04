@@ -14,8 +14,11 @@ APP_MIME_SIG = application/x-vnd.NFSMount
 
 # The following lines list the source files.
 SRCS = \
+	AboutBox.cpp \
 	App.cpp \
+	Constants.cpp \
 	EditShareWindow.cpp \
+	ImportExport.cpp \
 	MainWindow.cpp \
 	Settings.cpp \
 	ShareItem.cpp \

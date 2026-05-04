@@ -12,6 +12,7 @@
 #include <Alert.h>
 #include <String.h>
 
+#include "AboutBox.h"
 #include "Constants.h"
 #include "MainWindow.h"
 #include "ShareManager.h"
@@ -51,6 +52,13 @@ NFSMountApp::ArgvReceived(int32 argc, char** argv)
 		if (strcmp(argv[i], "--auto") == 0)
 			fAutoMode = true;
 	}
+}
+
+
+void
+NFSMountApp::AboutRequested()
+{
+	show_about_window();
 }
 
 

@@ -86,9 +86,11 @@ mkdir -p "$BUILD" "$PKG_ROOT/apps"
 # Compile
 # ------------------------------------------------------------------
 SOURCES=(
+	AboutBox.cpp
 	App.cpp
 	Constants.cpp
 	EditShareWindow.cpp
+	ImportExport.cpp
 	MainWindow.cpp
 	Settings.cpp
 	ShareItem.cpp
@@ -140,7 +142,7 @@ echo "==> Linking..."
 	-Wl,-rpath-link,"$HAIKU_RUNTIME_LIB" \
 	-Wl,-rpath-link,"$GCC_SYSLIBS" \
 	-shared-libgcc \
-	-lbe -lroot -lstdc++ -lgcc_s \
+	-lbe -ltracker -lroot -lstdc++ -lgcc_s \
 	"$HAIKU_DEVEL_LIB/libcolumnlistview.a" \
 	"$HAIKU_DEVEL_LIB/liblocalestub.a" \
 	-o "$BUILD/NFSMount"
@@ -170,6 +172,12 @@ chmod +x "$PKG_ROOT/apps/NFSMount"
 mkdir -p "$PKG_ROOT/data/deskbar/menu/Applications"
 ln -sf ../../../../apps/NFSMount \
 	"$PKG_ROOT/data/deskbar/menu/Applications/NFSMount"
+
+# Ship the MIT license under documentation/. Haiku's package
+# convention puts per-package docs at data/documentation/packages/<name>.
+mkdir -p "$PKG_ROOT/data/documentation/packages/nfsmount"
+cp "$PROJ/LICENSE" \
+	"$PKG_ROOT/data/documentation/packages/nfsmount/LICENSE"
 
 # .PackageInfo lives at the package root
 cp "$PKG_INFO_TEMPLATE" "$PKG_ROOT/.PackageInfo"

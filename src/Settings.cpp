@@ -60,7 +60,7 @@ Settings::WindowFrame() const
 {
 	BRect frame;
 	if (fSettings.FindRect(kFieldWindowFrame, &frame) != B_OK)
-		frame.Set(100, 100, 650, 400);
+		frame.Set(80, 80, 700, 410);
 
 	return frame;
 }

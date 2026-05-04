@@ -25,10 +25,10 @@
 EditShareWindow::EditShareWindow(BRect frame, BWindow* target,
 	const BMessage* share, int32 index)
 	:
-	BWindow(BRect(0, 0, 450, 500),
+	BWindow(BRect(0, 0, 450, 480),
 		index >= 0 ? "Edit NFS Share" : "Add NFS Share",
-		B_MODAL_WINDOW,
-		B_NOT_ZOOMABLE | B_NOT_RESIZABLE | B_AUTO_UPDATE_SIZE_LIMITS
+		B_TITLED_WINDOW,
+		B_NOT_ZOOMABLE | B_AUTO_UPDATE_SIZE_LIMITS
 			| B_CLOSE_ON_ESCAPE),
 	fTarget(target),
 	fEditIndex(index),
@@ -48,11 +48,14 @@ EditShareWindow::EditShareWindow(BRect frame, BWindow* target,
 	fDirTimeField(NULL),
 	fCacheMetadataBox(NULL),
 	fEmulateXattrBox(NULL),
-	fAdvancedBox(NULL),
+	fAdvancedTab(NULL),
+	fAdvancedView(NULL),
 	fHostnameField(NULL),
 	fUIDField(NULL),
 	fGIDField(NULL),
-	fV2OptionsBox(NULL)
+	fV2Tab(NULL),
+	fV2View(NULL),
+	fTabs(NULL)
 {
 	_BuildLayout();
 
@@ -114,7 +117,8 @@ EditShareWindow::MessageReceived(BMessage* message)
 void
 EditShareWindow::_BuildLayout()
 {
-	// NFS version selector
+	// NFS version selector — sits above the tabs because it changes
+	// which tabs are present.
 	BPopUpMenu* versionMenu = new BPopUpMenu("version");
 	BMenuItem* v2Item = new BMenuItem("NFSv2 (compatible)",
 		new BMessage(kMsgVersionChanged));
@@ -125,7 +129,7 @@ EditShareWindow::_BuildLayout()
 	v2Item->SetMarked(true);
 	fVersionField = new BMenuField("version", "NFS version:", versionMenu);
 
-	// Basic fields
+	// ---- Basic tab ----
 	fNameField = new BTextControl("name", "Name:", "", NULL);
 	fServerField = new BTextControl("server", "Server (IP address):",
 		"", NULL);
@@ -137,7 +141,31 @@ EditShareWindow::_BuildLayout()
 	fAutoMountBox = new BCheckBox("automount",
 		"Mount automatically at login", NULL);
 
-	// Advanced fields
+	// BCheckBox::MaxSize() defaults to the preferred (text-fit)
+	// width, which in a vertical layout caps the column's max
+	// width and locks horizontal resize. Override here so the
+	// window stays freely resizable. Same fix below for the two
+	// advanced-tab checkboxes.
+	fReadOnlyBox->SetExplicitMaxSize(
+		BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
+	fAutoMountBox->SetExplicitMaxSize(
+		BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
+
+	BView* basicView = new BGroupView("basic", B_VERTICAL);
+	BLayoutBuilder::Group<>((BGroupView*)basicView)
+		.SetInsets(B_USE_DEFAULT_SPACING)
+		.AddGrid()
+			.AddTextControl(fNameField, 0, 0)
+			.AddTextControl(fServerField, 0, 1)
+			.AddTextControl(fExportField, 0, 2)
+			.AddTextControl(fMountPointField, 0, 3)
+			.SetColumnWeight(1, 10.0f)
+		.End()
+		.Add(fReadOnlyBox)
+		.Add(fAutoMountBox)
+		.AddGlue();
+
+	// ---- Advanced tab (NFSv4) ----
 	fSoftRadio = new BRadioButton("soft", "Soft",
 		new BMessage(kMsgRetryModeChanged));
 	fHardRadio = new BRadioButton("hard", "Hard",
@@ -174,10 +202,10 @@ EditShareWindow::_BuildLayout()
 	fCacheMetadataBox->SetValue(B_CONTROL_ON);
 	fEmulateXattrBox = new BCheckBox("xattr",
 		"Emulate named attributes", NULL);
-
-	// Advanced options group
-	fAdvancedBox = new BBox("advanced");
-	fAdvancedBox->SetLabel("Advanced Options");
+	fCacheMetadataBox->SetExplicitMaxSize(
+		BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
+	fEmulateXattrBox->SetExplicitMaxSize(
+		BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
 
 	BGroupView* retryGroup = new BGroupView(B_HORIZONTAL);
 	BLayoutBuilder::Group<>(retryGroup)
@@ -185,49 +213,55 @@ EditShareWindow::_BuildLayout()
 		.Add(fHardRadio)
 		.AddGlue();
 
-	BGridView* advancedGrid = new BGridView();
-	BLayoutBuilder::Grid<>(advancedGrid)
-		.AddTextControl(fTimeoutField, 0, 0)
-		.AddTextControl(fRetransField, 0, 1)
-		.AddTextControl(fPortField, 0, 2)
-		.Add(fProtocolField->CreateLabelLayoutItem(), 0, 3)
-		.Add(fProtocolField->CreateMenuBarLayoutItem(), 1, 3)
-		.AddTextControl(fDirTimeField, 0, 4)
-		.SetColumnWeight(1, 10.0f);
-
-	BGroupView* advancedContent = new BGroupView(B_VERTICAL);
-	BLayoutBuilder::Group<>(advancedContent)
-		.SetInsets(B_USE_ITEM_INSETS)
+	fAdvancedView = new BGroupView("advanced", B_VERTICAL);
+	BLayoutBuilder::Group<>((BGroupView*)fAdvancedView)
+		.SetInsets(B_USE_DEFAULT_SPACING)
 		.AddGroup(B_HORIZONTAL)
 			.Add(new BStringView("retrylabel", "Retry mode:"))
 			.Add(retryGroup)
 		.End()
-		.Add(advancedGrid)
+		.AddGrid()
+			.AddTextControl(fTimeoutField, 0, 0)
+			.AddTextControl(fRetransField, 0, 1)
+			.AddTextControl(fPortField, 0, 2)
+			.Add(fProtocolField->CreateLabelLayoutItem(), 0, 3)
+			.Add(fProtocolField->CreateMenuBarLayoutItem(), 1, 3)
+			.AddTextControl(fDirTimeField, 0, 4)
+			.SetColumnWeight(1, 10.0f)
+		.End()
 		.Add(fCacheMetadataBox)
-		.Add(fEmulateXattrBox);
+		.Add(fEmulateXattrBox)
+		.AddGlue();
 
-	fAdvancedBox->AddChild(advancedContent);
-
-	// NFS v2 options group
-	fV2OptionsBox = new BBox("v2options");
-	fV2OptionsBox->SetLabel("NFSv2 Options");
-
+	// ---- NFSv2 tab ----
 	fHostnameField = new BTextControl("hostname", "Hostname:", "",
 		NULL);
 	fUIDField = new BTextControl("uid", "UID:", "0", NULL);
 	fGIDField = new BTextControl("gid", "GID:", "0", NULL);
 
-	BGroupView* v2Content = new BGroupView(B_VERTICAL);
-	BLayoutBuilder::Group<>(v2Content)
-		.SetInsets(B_USE_ITEM_INSETS)
+	fV2View = new BGroupView("v2options", B_VERTICAL);
+	BLayoutBuilder::Group<>((BGroupView*)fV2View)
+		.SetInsets(B_USE_DEFAULT_SPACING)
 		.AddGrid()
 			.AddTextControl(fHostnameField, 0, 0)
 			.AddTextControl(fUIDField, 0, 1)
 			.AddTextControl(fGIDField, 0, 2)
 			.SetColumnWeight(1, 10.0f)
-		.End();
+		.End()
+		.AddGlue();
 
-	fV2OptionsBox->AddChild(v2Content);
+	// ---- Tabs ----
+	fTabs = new BTabView("tabs", B_WIDTH_FROM_LABEL);
+
+	BTab* basicTab = new BTab();
+	fTabs->AddTab(basicView, basicTab);
+	basicTab->SetLabel("Basic");
+
+	fAdvancedTab = new BTab();
+	fAdvancedTab->SetLabel("Advanced");
+	fV2Tab = new BTab();
+	fV2Tab->SetLabel("NFSv2");
+	// Only one of {Advanced, NFSv2} is added at a time — see _UpdateVersionUI.
 
 	// Buttons
 	BButton* cancelButton = new BButton("cancel", "Cancel",
@@ -239,28 +273,19 @@ EditShareWindow::_BuildLayout()
 	// Main layout
 	BLayoutBuilder::Group<>(this, B_VERTICAL)
 		.SetInsets(B_USE_WINDOW_INSETS)
-		.AddGrid()
-			.Add(fVersionField->CreateLabelLayoutItem(), 0, 0)
-			.Add(fVersionField->CreateMenuBarLayoutItem(), 1, 0)
-			.AddTextControl(fNameField, 0, 1)
-			.AddTextControl(fServerField, 0, 2)
-			.AddTextControl(fExportField, 0, 3)
-			.AddTextControl(fMountPointField, 0, 4)
-			.SetColumnWeight(1, 10.0f)
+		.AddGroup(B_HORIZONTAL)
+			.Add(fVersionField->CreateLabelLayoutItem())
+			.Add(fVersionField->CreateMenuBarLayoutItem())
+			.AddGlue()
 		.End()
-		.Add(fReadOnlyBox)
-		.Add(fAutoMountBox)
-		.AddStrut(B_USE_HALF_ITEM_SPACING)
-		.Add(fV2OptionsBox)
-		.Add(fAdvancedBox)
-		.AddStrut(B_USE_HALF_ITEM_SPACING)
+		.Add(fTabs)
 		.AddGroup(B_HORIZONTAL)
 			.AddGlue()
 			.Add(cancelButton)
 			.Add(saveButton)
 		.End();
 
-	// Set initial visibility based on default version
+	// Establish the initial tab set based on the default version.
 	_UpdateVersionUI();
 }
 
@@ -498,16 +523,27 @@ EditShareWindow::_UpdateVersionUI()
 	bool isV4 = item != NULL
 		&& strcmp(item->Label(), "NFSv4") == 0;
 
-	// Show/hide version-specific option boxes
-	if (isV4) {
-		if (!fV2OptionsBox->IsHidden())
-			fV2OptionsBox->Hide();
-		if (fAdvancedBox->IsHidden())
-			fAdvancedBox->Show();
-	} else {
-		if (fV2OptionsBox->IsHidden())
-			fV2OptionsBox->Show();
-		if (!fAdvancedBox->IsHidden())
-			fAdvancedBox->Hide();
+	// Strip whichever extra tab is currently in the view (if any).
+	// BTabView::RemoveTab returns the BTab and detaches the view —
+	// it does not delete either, which is what we want, because we
+	// reuse the same fAdvancedTab/fV2Tab objects and their views.
+	for (int32 i = fTabs->CountTabs() - 1; i > 0; i--) {
+		BTab* tab = fTabs->TabAt(i);
+		if (tab == fAdvancedTab || tab == fV2Tab)
+			fTabs->RemoveTab(i);
 	}
+
+	// Add the right one for the selected version. The view pointer
+	// may not be currently parented (after RemoveTab it is detached),
+	// so AddTab(view, tab) re-parents it cleanly.
+	if (isV4) {
+		fTabs->AddTab(fAdvancedView, fAdvancedTab);
+	} else {
+		fTabs->AddTab(fV2View, fV2Tab);
+	}
+
+	// Keep the user on the Basic tab when version flips, so the
+	// content they're typing into doesn't vanish underneath them.
+	if (fTabs->Selection() != 0)
+		fTabs->Select(0);
 }

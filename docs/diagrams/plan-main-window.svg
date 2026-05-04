@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 400" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="titlebarGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#cbd5e0"/>
+    </linearGradient>
+    <linearGradient id="rowHover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ebf8ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <filter id="winShadow" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#00000025"/>
+    </filter>
+    <filter id="btnShadow" x="-4%" y="-8%" width="108%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#00000015"/>
+    </filter>
+  </defs>
+
+  <!-- Window frame -->
+  <rect x="30" y="20" width="600" height="360" rx="6" fill="white" stroke="#94a3b8" stroke-width="1.5" filter="url(#winShadow)"/>
+
+  <!-- Title bar -->
+  <rect x="30" y="20" width="600" height="28" rx="6" fill="url(#titlebarGrad)" stroke="#94a3b8" stroke-width="1"/>
+  <rect x="30" y="38" width="600" height="10" fill="url(#titlebarGrad)"/>
+  <!-- Close/zoom buttons -->
+  <circle cx="50" cy="34" r="5" fill="#fdba74" stroke="#f97316" stroke-width="1"/>
+  <circle cx="66" cy="34" r="5" fill="#86efac" stroke="#22c55e" stroke-width="1"/>
+  <!-- Title text -->
+  <text x="330" y="39" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">NFSMount</text>
+
+  <!-- Column headers -->
+  <rect x="42" y="56" width="576" height="24" fill="#f1f5f9"/>
+  <line x1="42" y1="80" x2="618" y2="80" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="58" y="73" font-size="11" font-weight="600" fill="#475569">Name</text>
+  <text x="200" y="73" font-size="11" font-weight="600" fill="#475569">Server</text>
+  <text x="370" y="73" font-size="11" font-weight="600" fill="#475569">Export</text>
+  <text x="520" y="73" font-size="11" font-weight="600" fill="#475569">Status</text>
+  <!-- Column dividers -->
+  <line x1="188" y1="56" x2="188" y2="260" stroke="#e2e8f0" stroke-width="1"/>
+  <line x1="358" y1="56" x2="358" y2="260" stroke="#e2e8f0" stroke-width="1"/>
+  <line x1="508" y1="56" x2="508" y2="260" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Row 1 (selected) -->
+  <rect x="42" y="80" width="576" height="28" fill="url(#rowHover)"/>
+  <text x="58" y="99" font-size="11" fill="#1e293b">NAS Music</text>
+  <text x="200" y="99" font-size="11" fill="#1e293b">192.168.1.50</text>
+  <text x="370" y="99" font-size="11" fill="#1e293b">/Music</text>
+  <rect x="518" y="87" width="68" height="18" rx="9" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+  <text x="552" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#16a34a">Mounted</text>
+
+  <!-- Row 2 -->
+  <rect x="42" y="108" width="576" height="28" fill="white"/>
+  <text x="58" y="127" font-size="11" fill="#1e293b">NAS Docs</text>
+  <text x="200" y="127" font-size="11" fill="#1e293b">192.168.1.50</text>
+  <text x="370" y="127" font-size="11" fill="#1e293b">/Docs</text>
+  <rect x="518" y="115" width="78" height="18" rx="9" fill="#f1f5f9" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="557" y="128" text-anchor="middle" font-size="10" font-weight="500" fill="#64748b">Unmounted</text>
+
+  <!-- Row 3 -->
+  <rect x="42" y="136" width="576" height="28" fill="white"/>
+  <text x="58" y="155" font-size="11" fill="#1e293b">Dev Server</text>
+  <text x="200" y="155" font-size="11" fill="#1e293b">192.168.74.122</text>
+  <text x="370" y="155" font-size="11" fill="#1e293b">/export</text>
+  <rect x="518" y="143" width="78" height="18" rx="9" fill="#f1f5f9" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="557" y="156" text-anchor="middle" font-size="10" font-weight="500" fill="#64748b">Unmounted</text>
+
+  <!-- Row separator lines -->
+  <line x1="42" y1="108" x2="618" y2="108" stroke="#f1f5f9" stroke-width="1"/>
+  <line x1="42" y1="136" x2="618" y2="136" stroke="#f1f5f9" stroke-width="1"/>
+  <line x1="42" y1="164" x2="618" y2="164" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Empty area -->
+  <rect x="42" y="164" width="576" height="96" fill="white"/>
+
+  <!-- List view border -->
+  <rect x="42" y="56" width="576" height="204" rx="4" fill="none" stroke="#cbd5e0" stroke-width="1"/>
+
+  <!-- Button row -->
+  <rect x="42" y="276" width="576" height="44" rx="0" fill="none"/>
+
+  <!-- Mount button -->
+  <rect x="52" y="282" width="72" height="30" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" filter="url(#btnShadow)"/>
+  <text x="88" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#16a34a">Mount</text>
+
+  <!-- Unmount button -->
+  <rect x="134" y="282" width="82" height="30" rx="6" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" filter="url(#btnShadow)"/>
+  <text x="175" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#c2410c">Unmount</text>
+
+  <!-- Spacer -->
+  <!-- Add button -->
+  <rect x="360" y="282" width="72" height="30" rx="6" fill="#f8fafc" stroke="#cbd5e0" stroke-width="1.5" filter="url(#btnShadow)"/>
+  <text x="396" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">Add...</text>
+
+  <!-- Edit button -->
+  <rect x="442" y="282" width="72" height="30" rx="6" fill="#f8fafc" stroke="#cbd5e0" stroke-width="1.5" filter="url(#btnShadow)"/>
+  <text x="478" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">Edit...</text>
+
+  <!-- Remove button -->
+  <rect x="524" y="282" width="82" height="30" rx="6" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5" filter="url(#btnShadow)"/>
+  <text x="565" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#dc2626">Remove</text>
+
+  <!-- Status bar -->
+  <rect x="42" y="330" width="576" height="28" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="58" y="349" font-size="10.5" fill="#64748b">Mounted at /boot/home/NAS/Music</text>
+
+  <!-- Annotations -->
+  <text x="330" y="392" text-anchor="middle" font-size="10" fill="#94a3b8" font-style="italic">BColumnListView with status, toolbar buttons, and status bar</text>
+</svg>

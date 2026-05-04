@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="folderGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="fds" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000012"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="320" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#1e293b">NFSMount — Project File Structure</text>
+
+  <!-- Background -->
+  <rect x="30" y="44" width="580" height="380" rx="10" fill="#fafafa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#fds)"/>
+
+  <!-- Root folder -->
+  <rect x="50" y="58" width="140" height="28" rx="6" fill="url(#folderGrad)" stroke="#d97706" stroke-width="1.5"/>
+  <text x="60" y="70" font-size="14" fill="#92400e">&#x1F4C1;</text>
+  <text x="80" y="77" font-size="13" font-weight="700" fill="#92400e" font-family="'Consolas', monospace">NFSMount/</text>
+
+  <!-- File rows -->
+  <!-- PLAN.md -->
+  <line x1="70" y1="86" x2="70" y2="106" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="106" x2="90" y2="106" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="98" y="110" font-size="11.5" font-family="'Consolas', monospace" fill="#475569">PLAN.md</text>
+  <text x="320" y="110" font-size="10" fill="#94a3b8">Project plan and design document</text>
+
+  <!-- Makefile -->
+  <line x1="70" y1="106" x2="70" y2="130" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="130" x2="90" y2="130" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="98" y="134" font-size="11.5" font-family="'Consolas', monospace" fill="#475569">Makefile</text>
+  <text x="320" y="134" font-size="10" fill="#94a3b8">Haiku makefile-engine build</text>
+
+  <!-- rdef -->
+  <line x1="70" y1="130" x2="70" y2="154" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="154" x2="90" y2="154" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="98" y="158" font-size="11.5" font-family="'Consolas', monospace" fill="#475569">NFSMount.rdef</text>
+  <text x="320" y="158" font-size="10" fill="#94a3b8">App icon, signature, version</text>
+
+  <!-- Source files - grouped with color -->
+  <!-- App -->
+  <line x1="70" y1="154" x2="70" y2="182" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="182" x2="90" y2="182" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="170" width="140" height="20" rx="4" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.8"/>
+  <text x="102" y="184" font-size="11" font-family="'Consolas', monospace" fill="#5b21b6">App.h / App.cpp</text>
+  <text x="320" y="184" font-size="10" fill="#7c3aed">NFSMountApp : BApplication</text>
+
+  <!-- MainWindow -->
+  <line x1="70" y1="182" x2="70" y2="208" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="208" x2="90" y2="208" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="196" width="220" height="20" rx="4" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="0.8"/>
+  <text x="102" y="210" font-size="11" font-family="'Consolas', monospace" fill="#0369a1">MainWindow.h / MainWindow.cpp</text>
+  <text x="320" y="210" font-size="10" fill="#0284c7">Main UI with share list</text>
+
+  <!-- EditShareWindow -->
+  <line x1="70" y1="208" x2="70" y2="234" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="234" x2="90" y2="234" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="222" width="270" height="20" rx="4" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="0.8"/>
+  <text x="102" y="236" font-size="11" font-family="'Consolas', monospace" fill="#0369a1">EditShareWindow.h / EditShareWindow.cpp</text>
+  <text x="370" y="236" font-size="10" fill="#0284c7">Add/Edit dialog</text>
+
+  <!-- ShareItem -->
+  <line x1="70" y1="234" x2="70" y2="260" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="260" x2="90" y2="260" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="248" width="220" height="20" rx="4" fill="#dcfce7" stroke="#86efac" stroke-width="0.8"/>
+  <text x="102" y="262" font-size="11" font-family="'Consolas', monospace" fill="#166534">ShareItem.h / ShareItem.cpp</text>
+  <text x="320" y="262" font-size="10" fill="#059669">BRow for BColumnListView</text>
+
+  <!-- ShareManager -->
+  <line x1="70" y1="260" x2="70" y2="286" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="286" x2="90" y2="286" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="274" width="250" height="20" rx="4" fill="#fff7ed" stroke="#fdba74" stroke-width="0.8"/>
+  <text x="102" y="288" font-size="11" font-family="'Consolas', monospace" fill="#c2410c">ShareManager.h / ShareManager.cpp</text>
+  <text x="350" y="288" font-size="10" fill="#ea580c">Mount/unmount ops</text>
+
+  <!-- Settings -->
+  <line x1="70" y1="286" x2="70" y2="312" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="312" x2="90" y2="312" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="300" width="210" height="20" rx="4" fill="#fef9c3" stroke="#fde047" stroke-width="0.8"/>
+  <text x="102" y="314" font-size="11" font-family="'Consolas', monospace" fill="#854d0e">Settings.h / Settings.cpp</text>
+  <text x="310" y="314" font-size="10" fill="#a16207">Load/save BMessage</text>
+
+  <!-- Constants -->
+  <line x1="70" y1="312" x2="70" y2="338" stroke="#cbd5e0" stroke-width="1.2"/>
+  <line x1="70" y1="338" x2="90" y2="338" stroke="#cbd5e0" stroke-width="1.2"/>
+  <rect x="94" y="326" width="130" height="20" rx="4" fill="#f1f5f9" stroke="#cbd5e0" stroke-width="0.8"/>
+  <text x="102" y="340" font-size="11" font-family="'Consolas', monospace" fill="#475569">Constants.h</text>
+  <text x="232" y="340" font-size="10" fill="#64748b">Message codes, defaults, strings</text>
+
+  <!-- Legend -->
+  <rect x="50" y="370" width="540" height="40" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="64" y="380" width="12" height="12" rx="2" fill="#ede9fe" stroke="#c4b5fd" stroke-width="0.8"/>
+  <text x="82" y="390" font-size="9" fill="#64748b">Application</text>
+  <rect x="152" y="380" width="12" height="12" rx="2" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="0.8"/>
+  <text x="170" y="390" font-size="9" fill="#64748b">Windows</text>
+  <rect x="226" y="380" width="12" height="12" rx="2" fill="#dcfce7" stroke="#86efac" stroke-width="0.8"/>
+  <text x="244" y="390" font-size="9" fill="#64748b">Data</text>
+  <rect x="282" y="380" width="12" height="12" rx="2" fill="#fff7ed" stroke="#fdba74" stroke-width="0.8"/>
+  <text x="300" y="390" font-size="9" fill="#64748b">Logic</text>
+  <rect x="344" y="380" width="12" height="12" rx="2" fill="#fef9c3" stroke="#fde047" stroke-width="0.8"/>
+  <text x="362" y="390" font-size="9" fill="#64748b">Persistence</text>
+  <rect x="434" y="380" width="12" height="12" rx="2" fill="#f1f5f9" stroke="#cbd5e0" stroke-width="0.8"/>
+  <text x="452" y="390" font-size="9" fill="#64748b">Constants</text>
+</svg>

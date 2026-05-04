@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 580" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="etitleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#cbd5e0"/>
+    </linearGradient>
+    <linearGradient id="advGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#faf5ff"/>
+      <stop offset="100%" stop-color="#f3e8ff"/>
+    </linearGradient>
+    <filter id="ews" x="-2%" y="-1%" width="104%" height="105%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#00000025"/>
+    </filter>
+    <filter id="ebs" x="-4%" y="-8%" width="108%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#00000015"/>
+    </filter>
+  </defs>
+
+  <!-- Window frame -->
+  <rect x="30" y="10" width="560" height="550" rx="6" fill="white" stroke="#94a3b8" stroke-width="1.5" filter="url(#ews)"/>
+
+  <!-- Title bar -->
+  <rect x="30" y="10" width="560" height="28" rx="6" fill="url(#etitleGrad)" stroke="#94a3b8" stroke-width="1"/>
+  <rect x="30" y="28" width="560" height="10" fill="url(#etitleGrad)"/>
+  <circle cx="50" cy="24" r="5" fill="#fdba74" stroke="#f97316" stroke-width="1"/>
+  <circle cx="66" cy="24" r="5" fill="#86efac" stroke="#22c55e" stroke-width="1"/>
+  <text x="310" y="29" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">Add NFS Share</text>
+
+  <!-- Form fields -->
+  <!-- Name -->
+  <text x="58" y="68" font-size="11" font-weight="600" fill="#475569">Name:</text>
+  <rect x="150" y="52" width="420" height="26" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="160" y="70" font-size="11" fill="#1e293b">NAS Music</text>
+
+  <!-- Server -->
+  <text x="58" y="104" font-size="11" font-weight="600" fill="#475569">Server:</text>
+  <rect x="150" y="88" width="420" height="26" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="160" y="106" font-size="11" fill="#1e293b">192.168.1.50</text>
+
+  <!-- Export path -->
+  <text x="58" y="140" font-size="11" font-weight="600" fill="#475569">Export path:</text>
+  <rect x="150" y="124" width="420" height="26" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="160" y="142" font-size="11" fill="#1e293b">/volume1/Music</text>
+
+  <!-- Mount point -->
+  <text x="58" y="176" font-size="11" font-weight="600" fill="#475569">Mount point:</text>
+  <rect x="150" y="160" width="420" height="26" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="160" y="178" font-size="11" fill="#1e293b">/boot/home/NAS/Music</text>
+
+  <!-- Checkboxes -->
+  <rect x="58" y="204" width="14" height="14" rx="3" fill="white" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="82" y="216" font-size="11" fill="#334155">Read only</text>
+
+  <rect x="58" y="230" width="14" height="14" rx="3" fill="white" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="82" y="242" font-size="11" fill="#334155">Mount automatically at login</text>
+
+  <!-- Advanced Options box -->
+  <rect x="48" y="268" width="534" height="236" rx="8" fill="url(#advGrad)" stroke="#c4b5fd" stroke-width="1.5"/>
+  <!-- Disclosure triangle -->
+  <polygon points="58,281 72,288 58,295" fill="#7c3aed"/>
+  <text x="82" y="293" font-size="12" font-weight="700" fill="#5b21b6">Advanced Options</text>
+
+  <!-- Retry mode -->
+  <text x="72" y="322" font-size="11" font-weight="600" fill="#475569">Retry mode:</text>
+  <!-- Radio buttons -->
+  <circle cx="178" cy="318" r="7" fill="white" stroke="#94a3b8" stroke-width="1.2"/>
+  <circle cx="178" cy="318" r="3.5" fill="#7c3aed"/>
+  <text x="192" y="322" font-size="11" fill="#334155">Soft</text>
+  <circle cx="242" cy="318" r="7" fill="white" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="256" y="322" font-size="11" fill="#334155">Hard</text>
+
+  <!-- Timeout -->
+  <text x="72" y="352" font-size="11" font-weight="600" fill="#475569">Timeout:</text>
+  <rect x="178" y="336" width="70" height="24" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="188" y="354" font-size="11" fill="#1e293b">60</text>
+  <text x="258" y="352" font-size="10" fill="#94a3b8">seconds</text>
+
+  <!-- Retries -->
+  <text x="72" y="380" font-size="11" font-weight="600" fill="#475569">Retries:</text>
+  <rect x="178" y="364" width="70" height="24" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="188" y="382" font-size="11" fill="#1e293b">5</text>
+  <text x="258" y="380" font-size="10" fill="#94a3b8">(soft mode only)</text>
+
+  <!-- Port -->
+  <text x="72" y="408" font-size="11" font-weight="600" fill="#475569">Port:</text>
+  <rect x="178" y="392" width="70" height="24" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="188" y="410" font-size="11" fill="#1e293b">2049</text>
+
+  <!-- Protocol -->
+  <text x="310" y="408" font-size="11" font-weight="600" fill="#475569">Protocol:</text>
+  <rect x="400" y="392" width="90" height="24" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="410" y="410" font-size="11" fill="#1e293b">TCP</text>
+  <polygon points="474,402 482,402 478,410" fill="#94a3b8"/>
+
+  <!-- Dir cache -->
+  <text x="72" y="438" font-size="11" font-weight="600" fill="#475569">Dir cache:</text>
+  <rect x="178" y="422" width="70" height="24" rx="4" fill="white" stroke="#cbd5e0" stroke-width="1.2"/>
+  <text x="188" y="440" font-size="11" fill="#1e293b">5</text>
+  <text x="258" y="438" font-size="10" fill="#94a3b8">seconds</text>
+
+  <!-- Checkboxes in advanced -->
+  <rect x="72" y="460" width="14" height="14" rx="3" fill="#7c3aed" stroke="#7c3aed" stroke-width="1.2"/>
+  <polyline points="75,467 79,472 85,462" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="96" y="472" font-size="11" fill="#334155">Metadata cache</text>
+
+  <rect x="72" y="484" width="14" height="14" rx="3" fill="white" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="96" y="496" font-size="11" fill="#334155">Emulate named attributes</text>
+
+  <!-- Buttons -->
+  <rect x="416" y="520" width="76" height="30" rx="6" fill="#f8fafc" stroke="#cbd5e0" stroke-width="1.5" filter="url(#ebs)"/>
+  <text x="454" y="540" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">Cancel</text>
+
+  <rect x="502" y="520" width="76" height="30" rx="6" fill="#2563eb" stroke="#1d4ed8" stroke-width="1" filter="url(#ebs)"/>
+  <text x="540" y="540" text-anchor="middle" font-size="11" font-weight="700" fill="white">Save</text>
+
+  <!-- Annotation -->
+  <text x="310" y="574" text-anchor="middle" font-size="10" fill="#94a3b8" font-style="italic">Modal:App window — advanced section collapsed by default</text>
+</svg>

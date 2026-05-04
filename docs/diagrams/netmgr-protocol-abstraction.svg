@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 480" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="dispatchGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ede9fe"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+    <linearGradient id="nfsGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dcfce7"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="smbGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="futureGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="100%" stop-color="#e5e5e5"/>
+    </linearGradient>
+    <linearGradient id="kernelGradNM" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef2f2"/>
+      <stop offset="100%" stop-color="#fecaca"/>
+    </linearGradient>
+    <filter id="nds" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#00000018"/>
+    </filter>
+    <marker id="narw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94a3b8"/>
+    </marker>
+    <marker id="narwGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#16a34a"/>
+    </marker>
+    <marker id="narwBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#0284c7"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="420" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1e1b4b">NetworkMounts — Protocol Abstraction Layer</text>
+  <text x="420" y="50" text-anchor="middle" font-size="11" fill="#94a3b8">Proposed multi-protocol architecture for NFSMount v2</text>
+
+  <!-- ShareManager dispatcher -->
+  <rect x="270" y="68" width="300" height="60" rx="12" fill="url(#dispatchGrad)" stroke="#7c3aed" stroke-width="2" filter="url(#nds)"/>
+  <text x="420" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#5b21b6">ShareManager</text>
+  <text x="420" y="110" text-anchor="middle" font-size="11" fill="#6d28d9">Protocol dispatcher — routes to correct backend</text>
+
+  <!-- Dispatch arrows -->
+  <line x1="340" y1="128" x2="160" y2="180" stroke="#16a34a" stroke-width="2" marker-end="url(#narwGreen)"/>
+  <line x1="420" y1="128" x2="420" y2="180" stroke="#0284c7" stroke-width="2" marker-end="url(#narwBlue)"/>
+  <line x1="500" y1="128" x2="680" y2="180" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#narw)"/>
+
+  <!-- NFSBackend -->
+  <rect x="40" y="184" width="240" height="120" rx="10" fill="url(#nfsGrad)" stroke="#16a34a" stroke-width="2" filter="url(#nds)"/>
+  <rect x="40" y="184" width="240" height="30" rx="10" fill="#16a34a"/>
+  <rect x="40" y="202" width="240" height="12" fill="#16a34a"/>
+  <text x="160" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="white">NFSBackend</text>
+  <text x="160" y="234" text-anchor="middle" font-size="10.5" fill="#166534">fs_mount_volume("nfs4", ...)</text>
+  <text x="160" y="252" text-anchor="middle" font-size="10.5" fill="#166534">Builds NFS4 parameter strings</text>
+  <text x="160" y="270" text-anchor="middle" font-size="10.5" fill="#166534">Kernel-native mount</text>
+  <text x="160" y="288" text-anchor="middle" font-size="10.5" fill="#166534">Full filesystem integration</text>
+  <rect x="52" y="224" width="44" height="16" rx="4" fill="#22c55e"/>
+  <text x="74" y="236" text-anchor="middle" font-size="8" font-weight="700" fill="white">DONE</text>
+
+  <!-- SMBBackend -->
+  <rect x="300" y="184" width="240" height="120" rx="10" fill="url(#smbGrad)" stroke="#0284c7" stroke-width="2" filter="url(#nds)"/>
+  <rect x="300" y="184" width="240" height="30" rx="10" fill="#0284c7"/>
+  <rect x="300" y="202" width="240" height="12" fill="#0284c7"/>
+  <text x="420" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="white">SMBBackend</text>
+  <text x="420" y="234" text-anchor="middle" font-size="10.5" fill="#0c4a6e">Implementation TBD</text>
+  <text x="420" y="252" text-anchor="middle" font-size="10.5" fill="#0c4a6e">Options: kernel, userlandfs,</text>
+  <text x="420" y="270" text-anchor="middle" font-size="10.5" fill="#0c4a6e">smbclient, or libsmb2</text>
+  <text x="420" y="288" text-anchor="middle" font-size="10.5" fill="#0c4a6e">Needs HaikuPorts investigation</text>
+  <rect x="312" y="224" width="56" height="16" rx="4" fill="#f59e0b"/>
+  <text x="340" y="236" text-anchor="middle" font-size="8" font-weight="700" fill="white">FUTURE</text>
+
+  <!-- Future protocols -->
+  <rect x="560" y="184" width="240" height="120" rx="10" fill="url(#futureGrad)" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#nds)"/>
+  <rect x="560" y="184" width="240" height="30" rx="10" fill="#94a3b8"/>
+  <rect x="560" y="202" width="240" height="12" fill="#94a3b8"/>
+  <text x="680" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="white">Future Protocols</text>
+  <text x="680" y="234" text-anchor="middle" font-size="10.5" fill="#525252">WebDAV (if davfs ported)</text>
+  <text x="680" y="252" text-anchor="middle" font-size="10.5" fill="#525252">SFTP (if FUSE sshfs ported)</text>
+  <text x="680" y="270" text-anchor="middle" font-size="10.5" fill="#525252">NetFS (Haiku-native, in-tree)</text>
+
+  <!-- Arrows to kernel -->
+  <line x1="160" y1="304" x2="160" y2="350" stroke="#16a34a" stroke-width="1.5" marker-end="url(#narwGreen)"/>
+  <line x1="420" y1="304" x2="420" y2="350" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#narwBlue)"/>
+
+  <!-- Kernel layer -->
+  <rect x="40" y="354" width="500" height="50" rx="10" fill="url(#kernelGradNM)" stroke="#ef4444" stroke-width="1.5" filter="url(#nds)"/>
+  <text x="290" y="376" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">Haiku Kernel — Filesystem Add-ons</text>
+  <text x="290" y="394" text-anchor="middle" font-size="10.5" fill="#dc2626">nfs4 (available) | smbfs (not available) | userlandfs (possible bridge)</text>
+
+  <!-- MountBackend interface box -->
+  <rect x="40" y="420" width="760" height="46" rx="8" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="60" y="440" font-size="11" font-weight="600" fill="#5b21b6">MountBackend interface:</text>
+  <text x="60" y="456" font-size="10" font-family="'Consolas', monospace" fill="#6d28d9">virtual Mount(share) | Unmount(path) | IsMounted(path) | BuildParameterString(share)</text>
+  <text x="680" y="440" font-size="10" fill="#94a3b8" font-style="italic">Abstract base class</text>
+</svg>

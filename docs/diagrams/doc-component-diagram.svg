@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 620" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="cAppGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ede9fe"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+    <linearGradient id="cWinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="cDataGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dcfce7"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="cLogicGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
+    </linearGradient>
+    <linearGradient id="cSettGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="cds" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#00000018"/>
+    </filter>
+    <marker id="carw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="440" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1e1b4b">NFSMount — Component Diagram</text>
+  <text x="440" y="48" text-anchor="middle" font-size="11" fill="#94a3b8">Detailed class relationships and responsibilities</text>
+
+  <!-- ====== NFSMountApp ====== -->
+  <rect x="310" y="66" width="260" height="60" rx="12" fill="url(#cAppGrad)" stroke="#7c3aed" stroke-width="2" filter="url(#cds)"/>
+  <text x="440" y="88" text-anchor="middle" font-size="14" font-weight="700" fill="#5b21b6">NFSMountApp</text>
+  <text x="440" y="104" text-anchor="middle" font-size="10.5" fill="#6d28d9">BApplication — entry point</text>
+  <text x="440" y="118" text-anchor="middle" font-size="9.5" fill="#8b5cf6">Owns Settings, handles --auto flag</text>
+
+  <!-- Connection lines from app -->
+  <line x1="370" y1="126" x2="160" y2="180" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#carw)"/>
+  <line x1="440" y1="126" x2="440" y2="180" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#carw)"/>
+  <line x1="510" y1="126" x2="720" y2="180" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#carw)"/>
+
+  <!-- ====== Settings ====== -->
+  <rect x="50" y="184" width="220" height="80" rx="10" fill="url(#cSettGrad)" stroke="#d97706" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="160" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Settings</text>
+  <text x="160" y="222" text-anchor="middle" font-size="10" fill="#b45309">Load/Save BMessage to disk</text>
+  <text x="160" y="238" text-anchor="middle" font-size="9.5" fill="#d97706">CountShares(), GetShare(i)</text>
+  <text x="160" y="252" text-anchor="middle" font-size="9.5" fill="#d97706">Add/Update/RemoveShare()</text>
+
+  <!-- ====== MainWindow ====== -->
+  <rect x="300" y="184" width="280" height="80" rx="10" fill="url(#cWinGrad)" stroke="#0284c7" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="440" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">MainWindow</text>
+  <text x="440" y="222" text-anchor="middle" font-size="10" fill="#0369a1">BWindow — Titled + Normal feel</text>
+  <text x="440" y="238" text-anchor="middle" font-size="9.5" fill="#0284c7">BColumnListView, toolbar, status bar</text>
+  <text x="440" y="252" text-anchor="middle" font-size="9.5" fill="#0284c7">BMessageRunner for status polling (10s)</text>
+
+  <!-- ====== EditShareWindow ====== -->
+  <rect x="620" y="184" width="230" height="80" rx="10" fill="url(#cWinGrad)" stroke="#0284c7" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="735" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">EditShareWindow</text>
+  <text x="735" y="222" text-anchor="middle" font-size="10" fill="#0369a1">BWindow — Modal feel</text>
+  <text x="735" y="238" text-anchor="middle" font-size="9.5" fill="#0284c7">Basic + Advanced fields</text>
+  <text x="735" y="252" text-anchor="middle" font-size="9.5" fill="#0284c7">Input validation, Cancel/Save</text>
+
+  <!-- Arrow: MainWindow opens EditShareWindow -->
+  <line x1="580" y1="224" x2="620" y2="224" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#carw)"/>
+  <text x="600" y="218" text-anchor="middle" font-size="8" fill="#0284c7">opens</text>
+
+  <!-- Connection from MainWindow down to children -->
+  <line x1="380" y1="264" x2="200" y2="320" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#carw)"/>
+  <line x1="500" y1="264" x2="660" y2="320" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#carw)"/>
+
+  <!-- ====== ShareItem ====== -->
+  <rect x="80" y="324" width="240" height="80" rx="10" fill="url(#cDataGrad)" stroke="#16a34a" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="200" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">ShareItem</text>
+  <text x="200" y="362" text-anchor="middle" font-size="10" fill="#15803d">BRow subclass for column list</text>
+  <text x="200" y="378" text-anchor="middle" font-size="9.5" fill="#16a34a">Columns: Name, Server, Export, Status</text>
+  <text x="200" y="394" text-anchor="middle" font-size="9.5" fill="#16a34a">Caches fIndex, fMounted state</text>
+
+  <!-- ====== ShareManager ====== -->
+  <rect x="540" y="324" width="280" height="80" rx="10" fill="url(#cLogicGrad)" stroke="#ea580c" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="680" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">ShareManager</text>
+  <text x="680" y="362" text-anchor="middle" font-size="10" fill="#c2410c">Static utility — no instances</text>
+  <text x="680" y="378" text-anchor="middle" font-size="9.5" fill="#ea580c">Mount(), Unmount(), IsMounted()</text>
+  <text x="680" y="394" text-anchor="middle" font-size="9.5" fill="#ea580c">BuildParameterString(), auto-mount scripts</text>
+
+  <!-- Arrow from ShareManager down to kernel API -->
+  <line x1="680" y1="404" x2="680" y2="440" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#carw)"/>
+
+  <!-- ====== Kernel API ====== -->
+  <rect x="520" y="444" width="320" height="60" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="680" y="466" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">Haiku Kernel API</text>
+  <text x="680" y="484" text-anchor="middle" font-size="10.5" fill="#dc2626" font-family="'Consolas', monospace">fs_mount_volume("nfs4", ...) / fs_unmount_volume()</text>
+  <text x="680" y="498" text-anchor="middle" font-size="9" fill="#b91c1c">&lt;fs_volume.h&gt;</text>
+
+  <!-- ====== Message flow legend ====== -->
+  <rect x="40" y="440" width="440" height="160" rx="10" fill="white" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cds)"/>
+  <text x="60" y="464" font-size="12" font-weight="700" fill="#1e293b">Key Message Flow</text>
+
+  <rect x="60" y="478" width="10" height="10" rx="2" fill="#0284c7"/>
+  <text x="80" y="488" font-size="10" fill="#334155" font-family="'Consolas', monospace">kMsgMountShare</text>
+  <text x="240" y="488" font-size="10" fill="#64748b">MainWindow -> ShareManager::Mount()</text>
+
+  <rect x="60" y="498" width="10" height="10" rx="2" fill="#16a34a"/>
+  <text x="80" y="508" font-size="10" fill="#334155" font-family="'Consolas', monospace">kMsgShareSaved</text>
+  <text x="240" y="508" font-size="10" fill="#64748b">EditShareWindow -> MainWindow</text>
+
+  <rect x="60" y="518" width="10" height="10" rx="2" fill="#d97706"/>
+  <text x="80" y="528" font-size="10" fill="#334155" font-family="'Consolas', monospace">kMsgCheckStatus</text>
+  <text x="240" y="528" font-size="10" fill="#64748b">BMessageRunner fires every 10s</text>
+
+  <rect x="60" y="538" width="10" height="10" rx="2" fill="#7c3aed"/>
+  <text x="80" y="548" font-size="10" fill="#334155" font-family="'Consolas', monospace">kMsgAutoMount</text>
+  <text x="240" y="548" font-size="10" fill="#64748b">App startup with --auto flag</text>
+
+  <rect x="60" y="558" width="10" height="10" rx="2" fill="#ef4444"/>
+  <text x="80" y="568" font-size="10" fill="#334155" font-family="'Consolas', monospace">kMsgShareSelected</text>
+  <text x="240" y="568" font-size="10" fill="#64748b">List selection -> enable/disable buttons</text>
+</svg>

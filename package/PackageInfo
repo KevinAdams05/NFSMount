@@ -1,0 +1,35 @@
+name			nfsmount
+version			0.0.4-1
+architecture	x86_64
+summary			"NFS share manager for Haiku"
+
+description		"A native Haiku application for managing NFSv4 network shares.
+Mount, unmount, save, and auto-mount NFS shares through a graphical interface
+instead of typing terminal commands every session.
+
+Features:
+  - Mount/unmount NFSv4 shares with one click
+  - Save share configurations persistently across reboots
+  - Auto-mount selected shares at login
+  - Advanced NFS4 tuning (timeout, retries, cache, port, etc.)
+  - Live status monitoring of external mount/unmount changes"
+
+packager		"Kevin Adams <kadams@triarcsolutions.com>"
+vendor			"Kevin Adams"
+
+licenses {
+	"MIT"
+}
+
+copyrights {
+	"2026 Kevin Adams"
+}
+
+provides {
+	nfsmount = 0.0.4
+	app:NFSMount = 0.0.4
+}
+
+requires {
+	haiku >= r1~beta5
+}

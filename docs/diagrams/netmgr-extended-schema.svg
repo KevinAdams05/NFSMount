@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 560" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="xRootGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="xNestedGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <linearGradient id="xNfsGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+    <linearGradient id="xSmbGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <filter id="xds" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00000015"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="375" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#1e293b">NetworkMounts — Extended Settings Schema</text>
+  <text x="375" y="48" text-anchor="middle" font-size="11" fill="#94a3b8">~/config/settings/NetworkMounts (with migration from NFSMount)</text>
+
+  <!-- Root message -->
+  <rect x="30" y="64" width="690" height="38" rx="8" fill="url(#xRootGrad)" stroke="#d97706" stroke-width="2" filter="url(#xds)"/>
+  <text x="50" y="85" font-size="13" font-weight="700" fill="#92400e" font-family="'Consolas', monospace">BMessage('NETM')</text>
+  <rect x="280" y="72" width="44" height="18" rx="4" fill="#7c3aed"/>
+  <text x="302" y="85" text-anchor="middle" font-size="9" font-weight="700" fill="white">NEW</text>
+
+  <!-- window_frame -->
+  <line x1="60" y1="102" x2="60" y2="118" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="60" y="118" width="260" height="28" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1.2" filter="url(#xds)"/>
+  <text x="76" y="137" font-size="11" font-family="'Consolas', monospace" fill="#7c3aed">"window_frame"</text>
+  <text x="210" y="137" font-size="10" fill="#64748b">: BRect</text>
+
+  <!-- shares nested message -->
+  <line x1="60" y1="102" x2="60" y2="162" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="60" y="158" width="650" height="386" rx="8" fill="url(#xNestedGrad)" stroke="#3b82f6" stroke-width="1.5" filter="url(#xds)"/>
+  <rect x="60" y="158" width="650" height="30" rx="8" fill="#3b82f6"/>
+  <rect x="60" y="176" width="650" height="12" fill="#3b82f6"/>
+  <text x="80" y="179" font-size="12" font-weight="700" fill="white" font-family="'Consolas', monospace">"shares"</text>
+  <text x="170" y="179" font-size="11" fill="#bfdbfe">: BMessage (repeated)</text>
+
+  <!-- Common fields -->
+  <text x="82" y="210" font-size="10" font-weight="700" fill="#1e40af">Common Fields</text>
+  <line x1="82" y1="216" x2="260" y2="216" stroke="#93c5fd" stroke-width="0.8"/>
+
+  <rect x="80" y="222" width="60" height="16" rx="4" fill="#7c3aed"/>
+  <text x="110" y="234" text-anchor="middle" font-size="8" font-weight="700" fill="white">NEW</text>
+  <text x="150" y="234" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"protocol"</text>
+  <text x="265" y="234" font-size="10" fill="#64748b">: string</text>
+  <text x="320" y="234" font-size="9" fill="#94a3b8">"nfs4" | "smb"</text>
+
+  <text x="90" y="256" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"name"</text>
+  <text x="180" y="256" font-size="10" fill="#64748b">: string</text>
+
+  <text x="90" y="274" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"server"</text>
+  <text x="180" y="274" font-size="10" fill="#64748b">: string</text>
+
+  <text x="90" y="292" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"mountPoint"</text>
+  <text x="200" y="292" font-size="10" fill="#64748b">: string</text>
+
+  <text x="90" y="310" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"readOnly"</text>
+  <text x="180" y="310" font-size="10" fill="#64748b">: bool</text>
+
+  <text x="90" y="328" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"autoMount"</text>
+  <text x="190" y="328" font-size="10" fill="#64748b">: bool</text>
+
+  <!-- NFS-specific section -->
+  <rect x="80" y="346" width="280" height="186" rx="6" fill="url(#xNfsGrad)" stroke="#16a34a" stroke-width="1.2"/>
+  <text x="100" y="366" font-size="10" font-weight="700" fill="#166534">NFS-Specific Fields</text>
+  <line x1="100" y1="372" x2="280" y2="372" stroke="#86efac" stroke-width="0.8"/>
+
+  <text x="100" y="390" font-size="10" font-family="'Consolas', monospace" fill="#166534">"export"</text>
+  <text x="200" y="390" font-size="9.5" fill="#64748b">string — server path</text>
+
+  <text x="100" y="408" font-size="10" font-family="'Consolas', monospace" fill="#166534">"hard"</text>
+  <text x="200" y="408" font-size="9.5" fill="#64748b">bool</text>
+
+  <text x="100" y="426" font-size="10" font-family="'Consolas', monospace" fill="#166534">"timeout"</text>
+  <text x="200" y="426" font-size="9.5" fill="#64748b">int32 (60)</text>
+
+  <text x="100" y="444" font-size="10" font-family="'Consolas', monospace" fill="#166534">"retrans"</text>
+  <text x="200" y="444" font-size="9.5" fill="#64748b">int32 (5)</text>
+
+  <text x="100" y="462" font-size="10" font-family="'Consolas', monospace" fill="#166534">"port"</text>
+  <text x="200" y="462" font-size="9.5" fill="#64748b">int32 (2049)</text>
+
+  <text x="100" y="480" font-size="10" font-family="'Consolas', monospace" fill="#166534">"nfsProtocol"</text>
+  <text x="226" y="480" font-size="9.5" fill="#64748b">string (tcp/udp)</text>
+
+  <text x="100" y="498" font-size="10" font-family="'Consolas', monospace" fill="#166534">"dirtime"</text>
+  <text x="200" y="498" font-size="9.5" fill="#64748b">int32 (5)</text>
+
+  <text x="100" y="516" font-size="10" font-family="'Consolas', monospace" fill="#166534">"cacheMetadata"</text>
+  <text x="240" y="516" font-size="9.5" fill="#64748b">bool (true)</text>
+
+  <text x="100" y="530" font-size="10" font-family="'Consolas', monospace" fill="#166534">"emulateXattr"</text>
+  <text x="240" y="530" font-size="9.5" fill="#64748b">bool (false)</text>
+
+  <!-- SMB-specific section -->
+  <rect x="380" y="346" width="310" height="186" rx="6" fill="url(#xSmbGrad)" stroke="#0284c7" stroke-width="1.2"/>
+  <rect x="548" y="350" width="56" height="16" rx="4" fill="#f59e0b"/>
+  <text x="576" y="362" text-anchor="middle" font-size="8" font-weight="700" fill="white">FUTURE</text>
+  <text x="400" y="366" font-size="10" font-weight="700" fill="#0c4a6e">SMB-Specific Fields</text>
+  <line x1="400" y1="372" x2="580" y2="372" stroke="#7dd3fc" stroke-width="0.8"/>
+
+  <text x="400" y="390" font-size="10" font-family="'Consolas', monospace" fill="#0c4a6e">"share"</text>
+  <text x="500" y="390" font-size="9.5" fill="#64748b">string — share name</text>
+
+  <text x="400" y="410" font-size="10" font-family="'Consolas', monospace" fill="#0c4a6e">"username"</text>
+  <text x="510" y="410" font-size="9.5" fill="#64748b">string</text>
+
+  <text x="400" y="430" font-size="10" font-family="'Consolas', monospace" fill="#0c4a6e">"password"</text>
+  <text x="510" y="430" font-size="9.5" fill="#64748b">string (or keychain ref)</text>
+
+  <text x="400" y="450" font-size="10" font-family="'Consolas', monospace" fill="#0c4a6e">"domain"</text>
+  <text x="500" y="450" font-size="9.5" fill="#64748b">string — workgroup</text>
+
+  <text x="400" y="470" font-size="10" font-family="'Consolas', monospace" fill="#0c4a6e">"smbVersion"</text>
+  <text x="530" y="470" font-size="9.5" fill="#64748b">string ("2.0", "3.0", "auto")</text>
+
+  <text x="400" y="500" font-size="9.5" fill="#0369a1" font-style="italic">Credential storage via BKeyStore</text>
+  <text x="400" y="516" font-size="9.5" fill="#0369a1" font-style="italic">or prompt-on-mount fallback</text>
+</svg>

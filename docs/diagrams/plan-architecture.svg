@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="appGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ede9fe"/>
+      <stop offset="100%" stop-color="#ddd6fe"/>
+    </linearGradient>
+    <linearGradient id="winGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="childGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="settingsGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="ds" x="-3%" y="-3%" width="106%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#00000018"/>
+    </filter>
+    <marker id="arw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="410" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1e1b4b">NFSMount — Application Architecture</text>
+
+  <!-- App node -->
+  <rect x="290" y="50" width="240" height="48" rx="24" fill="url(#appGrad)" stroke="#7c3aed" stroke-width="2" filter="url(#ds)"/>
+  <text x="410" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">NFSMount</text>
+  <text x="410" y="86" text-anchor="middle" font-size="11" fill="#7c3aed">BApplication</text>
+
+  <!-- Connector lines from app -->
+  <line x1="330" y1="98" x2="330" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="410" y1="98" x2="410" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="560" y1="98" x2="700" y2="98" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="700" y1="98" x2="700" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
+
+  <!-- ====== MainWindow ====== -->
+  <rect x="120" y="130" width="260" height="44" rx="10" fill="url(#winGrad)" stroke="#0284c7" stroke-width="2" filter="url(#ds)"/>
+  <text x="250" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">MainWindow</text>
+  <text x="250" y="164" text-anchor="middle" font-size="10" fill="#0369a1">BWindow — Titled + Normal</text>
+
+  <!-- MainWindow children -->
+  <line x1="180" y1="174" x2="180" y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="250" y1="174" x2="250" y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="330" y1="174" x2="330" y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+
+  <!-- ShareListView -->
+  <rect x="100" y="200" width="170" height="64" rx="8" fill="url(#childGrad)" stroke="#38bdf8" stroke-width="1.2" filter="url(#ds)"/>
+  <text x="185" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">ShareListView</text>
+  <text x="185" y="236" text-anchor="middle" font-size="9.5" fill="#64748b">BColumnListView</text>
+  <text x="185" y="252" text-anchor="middle" font-size="9" fill="#94a3b8">Saved shares + status</text>
+
+  <!-- Toolbar -->
+  <rect x="280" y="200" width="110" height="64" rx="8" fill="url(#childGrad)" stroke="#38bdf8" stroke-width="1.2" filter="url(#ds)"/>
+  <text x="335" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">Toolbar</text>
+  <text x="335" y="236" text-anchor="middle" font-size="9" fill="#64748b">Mount | Unmount</text>
+  <text x="335" y="250" text-anchor="middle" font-size="9" fill="#64748b">Add | Edit | Remove</text>
+
+  <!-- Status bar line -->
+  <rect x="100" y="276" width="290" height="28" rx="6" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+  <text x="245" y="295" text-anchor="middle" font-size="10" fill="#0369a1">Status bar (BStringView) — feedback messages</text>
+
+  <!-- ====== EditShareWindow ====== -->
+  <rect x="400" y="130" width="220" height="44" rx="10" fill="url(#winGrad)" stroke="#0284c7" stroke-width="2" filter="url(#ds)"/>
+  <text x="510" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">EditShareWindow</text>
+  <text x="510" y="164" text-anchor="middle" font-size="10" fill="#0369a1">BWindow — Modal</text>
+
+  <!-- EditShare children -->
+  <line x1="460" y1="174" x2="460" y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="560" y1="174" x2="560" y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+
+  <!-- Basic tab -->
+  <rect x="400" y="200" width="130" height="64" rx="8" fill="url(#childGrad)" stroke="#38bdf8" stroke-width="1.2" filter="url(#ds)"/>
+  <text x="465" y="218" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">Basic Tab</text>
+  <text x="465" y="234" text-anchor="middle" font-size="9" fill="#64748b">Server, export path</text>
+  <text x="465" y="248" text-anchor="middle" font-size="9" fill="#64748b">Mount point, read-only</text>
+
+  <!-- Advanced tab -->
+  <rect x="540" y="200" width="150" height="64" rx="8" fill="url(#childGrad)" stroke="#38bdf8" stroke-width="1.2" filter="url(#ds)"/>
+  <text x="615" y="218" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">Advanced Tab</text>
+  <text x="615" y="234" text-anchor="middle" font-size="9" fill="#64748b">hard/soft, timeout, retrans</text>
+  <text x="615" y="248" text-anchor="middle" font-size="9" fill="#64748b">port, proto, cache, xattr</text>
+
+  <!-- ====== Settings ====== -->
+  <rect x="600" y="130" width="200" height="44" rx="10" fill="url(#settingsGrad)" stroke="#d97706" stroke-width="2" filter="url(#ds)"/>
+  <text x="700" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Settings</text>
+  <text x="700" y="164" text-anchor="middle" font-size="10" fill="#b45309">BMessage flattened to disk</text>
+
+  <!-- Settings path -->
+  <rect x="610" y="190" width="180" height="24" rx="4" fill="#fffbeb" stroke="#fcd34d" stroke-width="1"/>
+  <text x="700" y="207" text-anchor="middle" font-size="9" font-family="'Consolas', monospace" fill="#92400e">~/config/settings/NFSMount</text>
+
+  <!-- ====== Design Decisions ====== -->
+  <rect x="40" y="340" width="740" height="200" rx="12" fill="#fafafa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#ds)"/>
+  <text x="410" y="368" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">Key Design Decisions</text>
+
+  <!-- Decision items -->
+  <circle cx="80" cy="400" r="6" fill="#7c3aed"/>
+  <text x="100" y="396" font-size="11.5" font-weight="600" fill="#1e293b">Direct kernel API, no shell commands</text>
+  <text x="100" y="412" font-size="10" fill="#64748b">Uses fs_mount_volume() / fs_unmount_volume() — no shelling out to mount or mount_nfs</text>
+
+  <circle cx="80" cy="440" r="6" fill="#0284c7"/>
+  <text x="100" y="436" font-size="11.5" font-weight="600" fill="#1e293b">NFSv4 only</text>
+  <text x="100" y="452" font-size="10" fill="#64748b">NFSv3 client is old and unreliable. Filesystem name = "nfs4"</text>
+
+  <circle cx="80" cy="480" r="6" fill="#059669"/>
+  <text x="100" y="476" font-size="11.5" font-weight="600" fill="#1e293b">Single-window app with modal edit dialog</text>
+  <text x="100" y="492" font-size="10" fill="#64748b">Follows HIG: Titled + Normal main window, Modal:App for edit dialogs</text>
+
+  <circle cx="80" cy="520" r="6" fill="#d97706"/>
+  <text x="100" y="516" font-size="11.5" font-weight="600" fill="#1e293b">Persistent settings via BMessage</text>
+  <text x="100" y="532" font-size="10" fill="#64748b">Share configs stored as flattened BMessage in ~/config/settings/NFSMount</text>
+</svg>

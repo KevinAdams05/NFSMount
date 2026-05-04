@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 520" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="dsRootGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="dsNestedGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <filter id="dsSh" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00000015"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#1e293b">Settings File Format — Detailed Schema</text>
+  <text x="350" y="48" text-anchor="middle" font-size="11" fill="#94a3b8">Flattened BMessage (binary) at ~/config/settings/NFSMount</text>
+
+  <!-- Root message -->
+  <rect x="30" y="64" width="640" height="38" rx="8" fill="url(#dsRootGrad)" stroke="#d97706" stroke-width="2" filter="url(#dsSh)"/>
+  <text x="50" y="85" font-size="13" font-weight="700" fill="#92400e" font-family="'Consolas', monospace">BMessage('NFSM')</text>
+
+  <!-- window_frame -->
+  <line x1="60" y1="102" x2="60" y2="120" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="60" y="120" width="310" height="30" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1.2" filter="url(#dsSh)"/>
+  <text x="76" y="140" font-size="11" font-family="'Consolas', monospace" fill="#7c3aed">"window_frame"</text>
+  <text x="210" y="140" font-size="10" fill="#64748b">: BRect</text>
+  <text x="280" y="140" font-size="9" fill="#94a3b8" font-style="italic">position &amp; size</text>
+
+  <!-- shares nested -->
+  <line x1="60" y1="102" x2="60" y2="168" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="60" y="164" width="600" height="342" rx="8" fill="url(#dsNestedGrad)" stroke="#3b82f6" stroke-width="1.5" filter="url(#dsSh)"/>
+  <rect x="60" y="164" width="600" height="30" rx="8" fill="#3b82f6"/>
+  <rect x="60" y="182" width="600" height="12" fill="#3b82f6"/>
+  <text x="80" y="185" font-size="12" font-weight="700" fill="white" font-family="'Consolas', monospace">"shares"</text>
+  <text x="170" y="185" font-size="11" fill="#bfdbfe">: BMessage (repeated, one per share)</text>
+
+  <!-- Left column: identity fields -->
+  <text x="82" y="216" font-size="10" font-weight="700" fill="#1e40af">Identity</text>
+  <line x1="82" y1="222" x2="180" y2="222" stroke="#93c5fd" stroke-width="0.8"/>
+
+  <text x="90" y="240" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"name"</text>
+  <text x="180" y="240" font-size="10" fill="#64748b">: string</text>
+
+  <text x="90" y="260" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"server"</text>
+  <text x="180" y="260" font-size="10" fill="#64748b">: string</text>
+
+  <text x="90" y="280" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"export"</text>
+  <text x="180" y="280" font-size="10" fill="#64748b">: string</text>
+
+  <text x="90" y="300" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"mountPoint"</text>
+  <text x="200" y="300" font-size="10" fill="#64748b">: string</text>
+
+  <!-- Left column: flags -->
+  <text x="82" y="332" font-size="10" font-weight="700" fill="#1e40af">Flags</text>
+  <line x1="82" y1="338" x2="180" y2="338" stroke="#93c5fd" stroke-width="0.8"/>
+
+  <text x="90" y="356" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"readOnly"</text>
+  <text x="190" y="356" font-size="10" fill="#64748b">: bool</text>
+  <text x="240" y="356" font-size="9" fill="#94a3b8">false</text>
+
+  <text x="90" y="376" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"autoMount"</text>
+  <text x="200" y="376" font-size="10" fill="#64748b">: bool</text>
+  <text x="250" y="376" font-size="9" fill="#94a3b8">false</text>
+
+  <text x="90" y="396" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"hard"</text>
+  <text x="150" y="396" font-size="10" fill="#64748b">: bool</text>
+  <text x="200" y="396" font-size="9" fill="#94a3b8">false (soft mode)</text>
+
+  <!-- Divider -->
+  <line x1="340" y1="210" x2="340" y2="490" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Right column: NFS options -->
+  <text x="360" y="216" font-size="10" font-weight="700" fill="#1e40af">NFS4 Options</text>
+  <line x1="360" y1="222" x2="480" y2="222" stroke="#93c5fd" stroke-width="0.8"/>
+
+  <text x="370" y="240" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"timeout"</text>
+  <text x="460" y="240" font-size="10" fill="#64748b">: int32</text>
+  <text x="520" y="240" font-size="9" fill="#94a3b8">60 seconds</text>
+
+  <text x="370" y="260" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"retrans"</text>
+  <text x="460" y="260" font-size="10" fill="#64748b">: int32</text>
+  <text x="520" y="260" font-size="9" fill="#94a3b8">5 retries</text>
+
+  <text x="370" y="280" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"port"</text>
+  <text x="430" y="280" font-size="10" fill="#64748b">: int32</text>
+  <text x="490" y="280" font-size="9" fill="#94a3b8">2049</text>
+
+  <text x="370" y="300" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"protocol"</text>
+  <text x="470" y="300" font-size="10" fill="#64748b">: string</text>
+  <text x="530" y="300" font-size="9" fill="#94a3b8">"tcp"</text>
+
+  <text x="370" y="320" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"dirtime"</text>
+  <text x="460" y="320" font-size="10" fill="#64748b">: int32</text>
+  <text x="520" y="320" font-size="9" fill="#94a3b8">5 seconds</text>
+
+  <text x="370" y="340" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"cacheMetadata"</text>
+  <text x="500" y="340" font-size="10" fill="#64748b">: bool</text>
+  <text x="550" y="340" font-size="9" fill="#94a3b8">true</text>
+
+  <text x="370" y="360" font-size="10.5" font-family="'Consolas', monospace" fill="#1e40af">"emulateXattr"</text>
+  <text x="500" y="360" font-size="10" fill="#64748b">: bool</text>
+  <text x="550" y="360" font-size="9" fill="#94a3b8">false</text>
+
+  <!-- Persistence note -->
+  <rect x="80" y="414" width="560" height="80" rx="6" fill="white" stroke="#93c5fd" stroke-width="1"/>
+  <text x="100" y="436" font-size="10.5" font-weight="600" fill="#1e293b">Persistence API:</text>
+  <text x="100" y="456" font-size="10" fill="#64748b" font-family="'Consolas', monospace">Save: BFile file(path, B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);</text>
+  <text x="100" y="472" font-size="10" fill="#64748b" font-family="'Consolas', monospace">      fSettings.Flatten(&amp;file);</text>
+  <text x="100" y="488" font-size="10" fill="#64748b" font-family="'Consolas', monospace">Load: BFile file(path, B_READ_ONLY); fSettings.Unflatten(&amp;file);</text>
+</svg>

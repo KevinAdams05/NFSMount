@@ -1,5 +1,5 @@
 name			nfsmount
-version			0.0.4-1
+version			0.0.5-1
 architecture	x86_64
 summary			"NFS share manager for Haiku"
 
@@ -26,8 +26,8 @@ copyrights {
 }
 
 provides {
-	nfsmount = 0.0.4
-	app:NFSMount = 0.0.4
+	nfsmount = 0.0.5
+	app:NFSMount = 0.0.5
 }
 
 requires {

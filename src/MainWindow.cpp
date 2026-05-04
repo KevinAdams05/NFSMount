@@ -11,12 +11,16 @@
 #include <Alert.h>
 #include <Application.h>
 #include <ColumnTypes.h>
+#include <Entry.h>
 #include <LayoutBuilder.h>
+#include <Menu.h>
 #include <Messenger.h>
 #include <String.h>
 
+#include "AboutBox.h"
 #include "Constants.h"
 #include "EditShareWindow.h"
+#include "ImportExport.h"
 #include "Settings.h"
 #include "ShareItem.h"
 #include "ShareManager.h"
@@ -27,6 +31,13 @@ MainWindow::MainWindow(Settings* settings)
 	BWindow(settings->WindowFrame(), kAppName, B_TITLED_WINDOW,
 		B_AUTO_UPDATE_SIZE_LIMITS),
 	fSettings(settings),
+	fMenuBar(NULL),
+	fImportItem(NULL),
+	fExportItem(NULL),
+	fMountMenuItem(NULL),
+	fUnmountMenuItem(NULL),
+	fEditMenuItem(NULL),
+	fRemoveMenuItem(NULL),
 	fShareList(NULL),
 	fMountButton(NULL),
 	fUnmountButton(NULL),
@@ -34,22 +45,32 @@ MainWindow::MainWindow(Settings* settings)
 	fEditButton(NULL),
 	fRemoveButton(NULL),
 	fStatusBar(NULL),
-	fStatusChecker(NULL)
+	fStatusChecker(NULL),
+	fImportExport(NULL)
 {
+	_BuildMenuBar();
 	_BuildLayout();
 	_LoadShares();
 	_UpdateButtons();
+
+	// Window size limits are derived from the layout via
+	// B_AUTO_UPDATE_SIZE_LIMITS — see the BWindow flags above.
+	// Children that would otherwise cap the layout's max width
+	// (status bar, etc.) explicitly set their own MaxSize.
 
 	// Start periodic mount status check
 	BMessage checkMsg(kMsgCheckStatus);
 	fStatusChecker = new BMessageRunner(BMessenger(this), &checkMsg,
 		kStatusCheckInterval);
+
+	fImportExport = new ImportExport(this);
 }
 
 
 MainWindow::~MainWindow()
 {
 	delete fStatusChecker;
+	delete fImportExport;
 }
 
 
@@ -105,6 +126,23 @@ MainWindow::MessageReceived(BMessage* message)
 			_CheckMountStatus();
 			break;
 
+		case kMsgImportShares:
+			_StartImport();
+			break;
+
+		case kMsgExportShares:
+			_StartExport();
+			break;
+
+		case kMsgImportPanelDone:
+		case kMsgExportPanelDone:
+			_HandleImportExport(message);
+			break;
+
+		case kMsgShowAbout:
+			show_about_window();
+			break;
+
 		default:
 			BWindow::MessageReceived(message);
 			break;
@@ -126,6 +164,49 @@ MainWindow::QuitRequested()
 
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	return true;
+}
+
+
+void
+MainWindow::_BuildMenuBar()
+{
+	fMenuBar = new BMenuBar("menubar");
+
+	BMenu* fileMenu = new BMenu("File");
+	fImportItem = new BMenuItem("Import shares" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgImportShares), 'O');
+	fExportItem = new BMenuItem("Export shares" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgExportShares), 'S');
+	fileMenu->AddItem(fImportItem);
+	fileMenu->AddItem(fExportItem);
+	fileMenu->AddSeparatorItem();
+	fileMenu->AddItem(new BMenuItem("Quit",
+		new BMessage(B_QUIT_REQUESTED), 'Q'));
+
+	BMenu* editMenu = new BMenu("Edit");
+	editMenu->AddItem(new BMenuItem("Add" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgAddShare), 'N'));
+	fEditMenuItem = new BMenuItem("Edit" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgEditShare), 'E');
+	editMenu->AddItem(fEditMenuItem);
+	fRemoveMenuItem = new BMenuItem("Remove",
+		new BMessage(kMsgRemoveShare), B_DELETE, 0);
+	editMenu->AddItem(fRemoveMenuItem);
+	editMenu->AddSeparatorItem();
+	fMountMenuItem = new BMenuItem("Mount",
+		new BMessage(kMsgMountShare), 'M');
+	editMenu->AddItem(fMountMenuItem);
+	fUnmountMenuItem = new BMenuItem("Unmount",
+		new BMessage(kMsgUnmountShare), 'U');
+	editMenu->AddItem(fUnmountMenuItem);
+
+	BMenu* helpMenu = new BMenu("Help");
+	helpMenu->AddItem(new BMenuItem("About NFSMount" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgShowAbout)));
+
+	fMenuBar->AddItem(fileMenu);
+	fMenuBar->AddItem(editMenu);
+	fMenuBar->AddItem(helpMenu);
 }
 
 
@@ -163,35 +244,34 @@ MainWindow::_BuildLayout()
 	fRemoveButton = new BButton("remove", "Remove",
 		new BMessage(kMsgRemoveShare));
 
-	// Status bar
+	// Status bar. Default BStringView::MaxSize() returns the preferred
+	// (text-fit) width — in a vertical layout that caps the entire
+	// window's max width. Override with B_SIZE_UNLIMITED so the
+	// window can be widened freely.
 	fStatusBar = new BStringView("statusbar", "");
 	fStatusBar->SetExplicitMinSize(BSize(100, B_SIZE_UNSET));
+	fStatusBar->SetExplicitMaxSize(BSize(B_SIZE_UNLIMITED, B_SIZE_UNSET));
 
-	// Layout
-	BLayoutBuilder::Group<>(this, B_VERTICAL)
-		.SetInsets(B_USE_WINDOW_INSETS)
-		.Add(fShareList, 10.0f)
-		.AddGroup(B_HORIZONTAL)
-			.Add(fMountButton)
-			.Add(fUnmountButton)
-			.AddGlue()
-			.Add(fAddButton)
-			.Add(fEditButton)
-			.Add(fRemoveButton)
-		.End()
-		.Add(fStatusBar);
+	// Layout: menu bar at the very top (no insets), main content
+	// below with the standard window insets.
+	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)
+		.Add(fMenuBar)
+		.AddGroup(B_VERTICAL)
+			.SetInsets(B_USE_WINDOW_INSETS)
+			.Add(fShareList, 10.0f)
+			.AddGroup(B_HORIZONTAL)
+				.Add(fMountButton)
+				.Add(fUnmountButton)
+				.AddGlue()
+				.Add(fAddButton)
+				.Add(fEditButton)
+				.Add(fRemoveButton)
+			.End()
+			.Add(fStatusBar)
+		.End();
 
-	// Keyboard shortcuts
-	AddShortcut('N', B_COMMAND_KEY,
-		new BMessage(kMsgAddShare));
-	AddShortcut('E', B_COMMAND_KEY,
-		new BMessage(kMsgEditShare));
-	AddShortcut('M', B_COMMAND_KEY,
-		new BMessage(kMsgMountShare));
-	AddShortcut('U', B_COMMAND_KEY,
-		new BMessage(kMsgUnmountShare));
-	AddShortcut(B_DELETE, 0,
-		new BMessage(kMsgRemoveShare));
+	// Keyboard shortcuts are provided by the menu items; nothing
+	// extra needed here.
 }
 
 
@@ -234,6 +314,25 @@ MainWindow::_UpdateButtons()
 	fUnmountButton->SetEnabled(hasSelection && isMounted);
 	fEditButton->SetEnabled(hasSelection);
 	fRemoveButton->SetEnabled(hasSelection && !isMounted);
+
+	_UpdateMenuItems();
+}
+
+
+void
+MainWindow::_UpdateMenuItems()
+{
+	ShareItem* item = _SelectedItem();
+	bool hasSelection = item != NULL;
+	bool isMounted = hasSelection && item->IsMounted();
+
+	fMountMenuItem->SetEnabled(hasSelection && !isMounted);
+	fUnmountMenuItem->SetEnabled(hasSelection && isMounted);
+	fEditMenuItem->SetEnabled(hasSelection);
+	fRemoveMenuItem->SetEnabled(hasSelection && !isMounted);
+
+	// Export is only meaningful if there's at least one share.
+	fExportItem->SetEnabled(fSettings->CountShares() > 0);
 }
 
 
@@ -461,4 +560,94 @@ ShareItem*
 MainWindow::_SelectedItem()
 {
 	return dynamic_cast<ShareItem*>(fShareList->CurrentSelection());
+}
+
+
+void
+MainWindow::_StartImport()
+{
+	if (fImportExport != NULL)
+		fImportExport->ShowOpenPanel();
+}
+
+
+void
+MainWindow::_StartExport()
+{
+	if (fImportExport != NULL)
+		fImportExport->ShowSavePanel();
+}
+
+
+void
+MainWindow::_HandleImportExport(BMessage* message)
+{
+	if (fImportExport == NULL)
+		return;
+
+	if (message->what == kMsgExportPanelDone) {
+		entry_ref dirRef;
+		BString filename;
+		if (message->FindRef("directory", &dirRef) != B_OK
+			|| message->FindString("name", &filename) != B_OK) {
+			return;
+		}
+
+		status_t result = fImportExport->ExportTo(dirRef,
+			filename.String(), *fSettings);
+		if (result != B_OK) {
+			BString text;
+			text.SetToFormat("Could not export shares.\n\n%s",
+				strerror(result));
+			BAlert* alert = new BAlert("Export Failed",
+				text.String(), "OK", NULL, NULL, B_WIDTH_AS_USUAL,
+				B_STOP_ALERT);
+			alert->Go();
+			_SetStatus("Export failed.");
+		} else {
+			_SetStatus("Shares exported.");
+		}
+		return;
+	}
+
+	// kMsgImportPanelDone
+	entry_ref ref;
+	if (message->FindRef("refs", &ref) != B_OK)
+		return;
+
+	int32 importedCount = 0;
+	int32 skippedCount = 0;
+	status_t result = fImportExport->ImportFrom(ref, *fSettings,
+		&importedCount, &skippedCount);
+	if (result != B_OK) {
+		BString text;
+		text.SetToFormat("Could not import shares.\n\n%s",
+			strerror(result));
+		BAlert* alert = new BAlert("Import Failed", text.String(),
+			"OK", NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT);
+		alert->Go();
+		_SetStatus("Import failed.");
+		return;
+	}
+
+	fSettings->Save();
+
+	// Update auto-mount launch script in case any imported share
+	// has auto-mount enabled.
+	if (fSettings->HasAutoMountShares())
+		ShareManager::InstallAutoMount();
+
+	_LoadShares();
+	_UpdateButtons();
+
+	BString status;
+	if (skippedCount > 0) {
+		status.SetToFormat("Imported %" B_PRId32 " share(s); "
+			"%" B_PRId32 " skipped (already exist by name).",
+			importedCount, skippedCount);
+	} else {
+		status.SetToFormat("Imported %" B_PRId32 " share(s).",
+			importedCount);
+	}
+	_SetStatus(status.String());
 }

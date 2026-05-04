@@ -11,6 +11,7 @@
 #include <CheckBox.h>
 #include <MenuField.h>
 #include <RadioButton.h>
+#include <TabView.h>
 #include <TextControl.h>
 #include <Window.h>
 
@@ -57,13 +58,22 @@ private:
 			BCheckBox*			fCacheMetadataBox;
 			BCheckBox*			fEmulateXattrBox;
 
-			BBox*				fAdvancedBox;
+			// We keep tab pointers so we can add/remove the
+			// version-specific tab when the user toggles between
+			// NFSv2 and NFSv4 — BTabView doesn't hide tabs, so we
+			// rebuild the tab list instead.
+			BTab*				fAdvancedTab;
+			BView*				fAdvancedView;
 
 			// NFS v2 specific fields
 			BTextControl*		fHostnameField;
 			BTextControl*		fUIDField;
 			BTextControl*		fGIDField;
-			BBox*				fV2OptionsBox;
+			BTab*				fV2Tab;
+			BView*				fV2View;
+
+			// Tab container that holds Basic / Advanced / NFSv2.
+			BTabView*			fTabs;
 };
 
 

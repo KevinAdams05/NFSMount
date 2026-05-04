@@ -54,7 +54,30 @@ enum {
 	kMsgCheckStatus			= 'chks',
 	kMsgRetryModeChanged	= 'rtmd',
 	kMsgVersionChanged		= 'vrch',
+
+	// File menu
+	kMsgImportShares		= 'impt',
+	kMsgExportShares		= 'expt',
+
+	// Help menu
+	kMsgShowAbout			= 'abou',
+
+	// File panel callbacks (BFilePanel posts B_REFS_RECEIVED for open
+	// and B_SAVE_REQUESTED for save; we discriminate by 'what')
+	kMsgImportPanelDone		= 'imdn',
+	kMsgExportPanelDone		= 'exdn',
 };
+
+// Export-file format
+//   magic: 'NFSE' (NFSMount Export)
+//   version: increment on incompatible changes
+extern const uint32 kExportMagic;
+extern const int32 kExportVersion;
+extern const char* const kExportFieldMagic;
+extern const char* const kExportFieldVersion;
+extern const char* const kExportFieldShares;
+extern const char* const kExportFileExtension;
+extern const char* const kExportMimeType;
 
 // Settings field names
 extern const char* const kFieldShares;

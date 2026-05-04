@@ -3,8 +3,18 @@
 ## Architecture
 
 NFSMount is a native Haiku C++ application built on the BeOS/Haiku API. It
-uses the kernel's `fs_mount_volume()` API to mount NFSv4 shares directly,
-without shelling out to command-line tools.
+uses the kernel's `fs_mount_volume()` API to mount NFS shares directly,
+without shelling out to command-line tools. Both filesystems Haiku ships
+in-tree are supported:
+
+- **`nfs4`** — NFSv4 (the default for new shares).
+- **`nfs`** — the legacy BeOS-era NFSv2 client, used as a compatibility
+  fallback for servers that don't speak v4.
+
+Each share carries an `nfsVersion` field that selects between the two; the
+two protocols use different mount-parameter formats and slightly different
+sets of options, which is why the editor exposes a separate "NFSv2" tab
+(see `EditShareWindow` below).
 
 ### Component Diagram
 
@@ -20,6 +30,8 @@ Entry point. Subclasses `BApplication`.
 |--------|---------|
 | `ReadyToRun()` | Opens MainWindow (normal mode) or calls `_AutoMount()` |
 | `ArgvReceived()` | Parses `--auto` flag for auto-mount mode |
+| `AboutRequested()` | Calls `show_about_window()`. Lets the Deskbar's standard "About this app" entry work without going through the menu. |
+| `QuitRequested()` | Returns `true` (default behavior) |
 | `_AutoMount()` | Mounts all auto-mount shares; shows errors or quits |
 
 **Auto-mount mode**: When launched with `--auto`, the app mounts all shares
@@ -82,12 +94,33 @@ minimal.
 #### MainWindow (MainWindow.h / MainWindow.cpp)
 
 Primary UI. Subclasses `BWindow` with Titled look and Normal feel.
+Resizable; size limits derived from the layout via
+`B_AUTO_UPDATE_SIZE_LIMITS`. Window-frame restored from settings on
+launch and saved back on quit.
 
 **Layout**: Uses `BLayoutBuilder::Group<>` for vertical arrangement:
-1. `BColumnListView` (weighted 10x for expansion)
-2. Horizontal button group with Mount/Unmount on the left, Add/Edit/Remove
-   on the right
-3. `BStringView` status bar at the bottom
+
+1. **`BMenuBar`** at the top with three menus:
+   - **File** — Import shares… (`Cmd-O`), Export shares… (`Cmd-S`),
+     Quit (`Cmd-Q`)
+   - **Edit** — Add… (`Cmd-N`), Edit… (`Cmd-E`), Remove (`Delete`),
+     Mount (`Cmd-M`), Unmount (`Cmd-U`)
+   - **Help** — About NFSMount…
+2. Below the menu bar, a nested vertical group (with window insets):
+   - `BColumnListView` (weighted 10x for expansion)
+   - Horizontal button group with Mount/Unmount on the left,
+     Add/Edit/Remove on the right
+   - `BStringView` status bar at the bottom — explicit
+     `B_SIZE_UNLIMITED` max width so it doesn't cap the column's
+     resizable range (default `BStringView::MaxSize()` returns the
+     preferred text-fit width).
+
+**Menu/button enable state**: `_UpdateButtons()` and
+`_UpdateMenuItems()` are called whenever the selection changes or
+shares are added/removed. Mount is enabled only on an unmounted
+selection; Unmount only on a mounted one; Edit/Remove require a
+selection (Remove additionally requires the share to be unmounted).
+Export is disabled when there are zero shares.
 
 **Mount status monitoring**: A `BMessageRunner` fires `kMsgCheckStatus`
 every 10 seconds. The handler iterates all `ShareItem` rows and compares
@@ -96,13 +129,14 @@ and invalidated for redraw.
 
 **Window lifecycle**: On quit, saves window frame to settings and updates
 the auto-mount launch script (installs if any share has auto-mount,
-removes if none do).
+removes if none do). Owns an `ImportExport` instance that's torn down in
+the destructor.
 
 **Message handling**:
 
 | Message | Handler |
 |---------|---------|
-| `kMsgShareSelected` | Update button enable/disable states |
+| `kMsgShareSelected` | Update button + menu enable/disable states |
 | `kMsgShareInvoked` | Open edit window (double-click) |
 | `kMsgMountShare` | Mount the selected share |
 | `kMsgUnmountShare` | Unmount the selected share |
@@ -111,23 +145,54 @@ removes if none do).
 | `kMsgRemoveShare` | Confirm and remove share from settings |
 | `kMsgShareSaved` | Handle save from EditShareWindow |
 | `kMsgCheckStatus` | Periodic mount status refresh |
+| `kMsgImportShares` | Show the open `BFilePanel` (delegates to `ImportExport`) |
+| `kMsgExportShares` | Show the save `BFilePanel` (delegates to `ImportExport`) |
+| `kMsgImportPanelDone` | Read selected file via `ImportExport::ImportFrom()`, refresh list, surface result/skip count |
+| `kMsgExportPanelDone` | Write selected file via `ImportExport::ExportTo()`, surface success/error |
+| `kMsgShowAbout` | Calls `show_about_window()` |
 
 #### EditShareWindow (EditShareWindow.h / EditShareWindow.cpp)
 
-Modal dialog for adding or editing a share. Title changes based on context
-("Add NFS Share" vs "Edit NFS Share").
+Add/edit dialog. Title changes based on context ("Add NFS Share" vs
+"Edit NFS Share"). `B_TITLED_WINDOW` (not modal) since 0.0.4 — the
+user can keep the main window in view while editing. Closes on
+Escape via `B_CLOSE_ON_ESCAPE`. Resizable; size limits derived from
+the layout.
 
 **Layout**: Vertical group containing:
-1. Grid of labeled text controls (name, server, export, mount point)
-2. Checkboxes (read-only, auto-mount)
-3. BBox "Advanced Options" containing a sub-grid of tuning parameters
-4. Cancel/Save button row
+
+1. **NFS version selector** (`BMenuField`, "NFSv2 (compatible)" /
+   "NFSv4") at the top, outside the tab view because changing it
+   alters the tab set.
+2. **`BTabView`** with up to three tabs:
+   - **Basic** — always present. Grid of labeled text controls
+     (name, server, export, mount point) plus the read-only and
+     auto-mount checkboxes.
+   - **Advanced** — present only when NFSv4 is selected. Soft/hard
+     radio pair, timeout, retries, port, protocol (TCP/UDP),
+     directory cache, metadata-cache toggle, named-attribute
+     emulation.
+   - **NFSv2** — present only when NFSv2 is selected. Hostname, UID,
+     GID.
+3. Cancel/Save button row at the bottom.
+
+`_UpdateVersionUI()` swaps the third tab in/out by calling
+`BTabView::RemoveTab` and `AddTab` against pre-built `BTab`/`BView`
+pairs. `BTab::SetView` is a no-op when the view is unchanged, so
+the user's typed values survive a version flip.
+
+**Width-resize fix**: The four checkboxes (`fReadOnlyBox`,
+`fAutoMountBox`, `fCacheMetadataBox`, `fEmulateXattrBox`) explicitly
+set `B_SIZE_UNLIMITED` max width. `BCheckBox::MaxSize()` defaults to
+the preferred (text-fit) width, which in a vertical layout caps the
+column's max width and locks horizontal resize.
 
 **Validation**: `_ValidateFields()` checks:
 - Name is non-empty
 - Server is non-empty
 - Export path starts with `/`
 - Mount point starts with `/`
+- For NFSv2 only: hostname is non-empty
 
 Validation failure shows a `BAlert` and focuses the offending field.
 
@@ -152,14 +217,82 @@ NFS share.
 **State**: Stores the share's settings index (`fIndex`) for mapping back to
 `Settings`. Caches mount status (`fMounted`) to avoid redundant stat calls.
 
+#### ImportExport (ImportExport.h / ImportExport.cpp)
+
+Wraps a pair of `BFilePanel` instances (one open, one save) for
+the File menu's Import / Export commands. Keeps the file-panel
+plumbing out of `MainWindow`.
+
+| Method | Purpose |
+|--------|---------|
+| `ShowOpenPanel()` | Display the open panel; selection posts `kMsgImportPanelDone` to the target |
+| `ShowSavePanel()` | Display the save panel; submission posts `kMsgExportPanelDone` |
+| `ExportTo(dirRef, name, settings)` | Write the share list to `<dir>/<name>` (appends `.nfsmount` if missing) |
+| `ImportFrom(ref, settings, &imported, &skipped)` | Validate header, append non-duplicate shares to `Settings` |
+
+**On-disk format** (flattened `BMessage`, what code is irrelevant —
+the magic int field is the real signature):
+
+| Field | Type | Value |
+|-------|------|-------|
+| `"magic"` | int32 | `'NFSE'` |
+| `"version"` | int32 | `kExportVersion` (currently `1`) |
+| `"shares"` | BMessage[] | one entry per share, identical schema to the in-memory `Settings` shares |
+
+Window-frame and other UI state are intentionally *not* exported.
+
+**Compatibility rules**:
+- Files with the wrong magic are rejected with `B_BAD_TYPE`.
+- Files written by a *newer* version (`version > kExportVersion`)
+  are rejected with `B_NOT_SUPPORTED`, so unknown fields are never
+  silently dropped.
+- Older files are accepted; missing optional fields fall back to
+  defaults via the same `FindXxx`/default-value pattern that
+  `Settings::GetShare()` consumers already use.
+
+**Duplicate handling**: Imported shares whose `name` matches an
+existing share are skipped rather than producing ambiguous
+duplicates. The skipped count is returned to the caller and surfaced
+in the status bar (e.g. *"Imported 3 share(s); 1 skipped (already
+exist by name)"*).
+
+#### AboutBox (AboutBox.h / AboutBox.cpp)
+
+A single free function — `void show_about_window()` — that builds
+and displays Haiku's standard `BAboutWindow`. The window owns
+itself and quits when closed, so the caller doesn't need to retain
+a pointer.
+
+| Section | Content |
+|---------|---------|
+| Description | Two-paragraph overview of what NFSMount does |
+| Copyright | Set via `BAboutWindow::AddCopyright(2026, "Kevin Adams")`. When the first year equals the current year, the dialog renders just `© 2026 Kevin Adams`. |
+| Source code | Link to the repo on GitHub |
+| License | Full MIT license text, embedded as a string constant kept in sync with the project's `LICENSE` file |
+| Acknowledgements | Notes which Haiku kits the app is built on (be, tracker, columnlistview, localestub) and the GCC runtime. None require attribution; listing is a courtesy. |
+
+Called from two places:
+- `MainWindow::MessageReceived` on `kMsgShowAbout` (the Help menu).
+- `NFSMountApp::AboutRequested` (the Deskbar's standard "About this
+  app" action sends `B_ABOUT_REQUESTED` to the application).
+
 #### Constants (Constants.h)
 
 Defines all shared constants:
 - Application signature and name
-- NFS4 default values (timeout, retrans, port, protocol, dirtime)
-- BMessage `what` codes for inter-window messaging
-- Settings field name strings
+- NFS filesystem identifiers (`kNFSFileSystem`, `kNFS4FileSystem`)
+- NFS version selectors and default values (timeout, retrans, port,
+  protocol, dirtime, default UID/GID for v2)
+- BMessage `what` codes for inter-window messaging — including the
+  Import/Export pair, the file-panel callbacks, and `kMsgShowAbout`
+- Settings field name strings (including v2 fields: `nfsVersion`,
+  `hostname`, `uid`, `gid`)
+- Export-file format constants: `kExportMagic` (`'NFSE'`),
+  `kExportVersion`, `kExportFieldMagic`, `kExportFieldVersion`,
+  `kExportFieldShares`, `kExportFileExtension` (`.nfsmount`),
+  `kExportMimeType`
 - Status check interval
+- Auto-mount launch script name
 
 ---
 
@@ -255,10 +388,15 @@ NFSMount uses Haiku's `makefile-engine`, the standard build system for
 third-party Haiku applications.
 
 **Dependencies**:
-- `libbe.so` — Core Haiku API (BApplication, BWindow, BMessage, etc.)
-- `libcolumnlistview.so` — BColumnListView widget
-- `libtracker.so` — Tracker shared headers
-- `liblocalestub.a` — Locale Kit stub (for future localization)
+- `libbe.so` — Core Haiku API: `BApplication`, `BWindow`, `BMessage`,
+  `BMenuBar`, `BTabView`, `BAboutWindow`, layout API, etc.
+- `libtracker.so` — Hosts `BFilePanel` (used by `ImportExport`) and
+  `BColumnListView`/`BColumnTypes` (Tracker's column-list widget).
+- `libcolumnlistview.a` — Static archive linked into the binary
+  alongside libtracker for the column-list widget. (Cross-build:
+  `$HAIKU_DEVEL_LIB/libcolumnlistview.a`.)
+- `liblocalestub.a` — Locale Kit stub (for future localization).
+- `libroot.so` + `libstdc++` + `libgcc_s` — standard runtime.
 
 **Private headers**: `BColumnListView` and `BColumnTypes` are in Haiku's
 private interface headers at
@@ -279,33 +417,10 @@ make clean
 
 ---
 
-## Future Work (Phase 3)
+## Future Work
 
-Items deferred from the current implementation:
-
-- **Application icon**: Design an HVIF icon in Icon-O-Matic depicting a
-  network folder. Add to NFSMount.rdef as a VICN resource.
-
-- **About window**: Standard Haiku About dialog showing version, author,
-  and license.
-
-- **Localization**: Add `.catkeys` catalog files for translating UI strings
-  via Haiku's Locale Kit.
-
-- **Drag and drop**: Drag a share from the list to Tracker to open its
-  mount point in a file manager window.
-
-- **Deskbar replicant**: A small shelf icon in the Deskbar tray showing
-  mount status, with a popup menu for quick mount/unmount.
-
-- **NFSv3 support**: Add a protocol version selector that switches between
-  `nfs4` and `nfs` filesystem types with appropriate parameter formats.
-
-- **Server discovery**: mDNS/Bonjour browsing for NFS servers on the local
-  network.
-
-- **Mount point browsing**: A file panel for selecting the local mount point
-  instead of typing a path.
+Pending and deferred items are tracked in [`TODO.md`](../TODO.md) at the
+project root.
 
 ---
 

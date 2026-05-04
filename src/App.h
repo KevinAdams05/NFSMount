@@ -18,6 +18,7 @@ public:
 
 	virtual	void				ReadyToRun();
 	virtual	void				ArgvReceived(int32 argc, char** argv);
+	virtual	void				AboutRequested();
 	virtual	bool				QuitRequested();
 
 			Settings*			GetSettings() { return &fSettings; }

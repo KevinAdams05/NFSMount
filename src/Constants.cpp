@@ -45,3 +45,12 @@ const char* const kFieldGID = "gid";
 
 // Auto-mount launch script name
 const char* const kLaunchScriptName = "NFSMount";
+
+// Export-file format
+const uint32 kExportMagic = 'NFSE';
+const int32 kExportVersion = 1;
+const char* const kExportFieldMagic = "magic";
+const char* const kExportFieldVersion = "version";
+const char* const kExportFieldShares = "shares";
+const char* const kExportFileExtension = ".nfsmount";
+const char* const kExportMimeType = "application/x-vnd.NFSMount-export";

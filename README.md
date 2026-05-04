@@ -1,8 +1,23 @@
+>[!WARNING]
+>This is very early alpha code. 
+>**Bug reports (please attach syslog and/or screenshots) and PRs welcome!**
+
+>[!NOTE]
+>An LLM was used to aid in development of this code.
+
 # NFSMount
 
 A native Haiku application for managing NFSv4 network shares. Mount, unmount,
 save, and auto-mount NFS shares through a graphical interface instead of typing
 terminal commands every session.
+
+My test NFS server is  Unraid 6.12.13.
+
+## Screenshots
+
+![NFSMount main window](resources/screenshot-main.png)
+
+![Edit NFS Share dialog](resources/screenshot-edit.png)
 
 ## Features
 
@@ -13,6 +28,13 @@ terminal commands every session.
 - **Live status** monitoring detects external mount/unmount changes
 - Native Haiku UI using the Layout API and BColumnListView
 
+## Documentation
+
+- [Changelog](CHANGELOG.md) — version history and release notes.
+- [Technical documentation](docs/DOCUMENTATION.md) — architecture, class
+  reference, kernel API, settings format, build system.
+- [TODO list](TODO.md) — pending features and deferred enhancements.
+
 ## Requirements
 
 - Haiku R1/beta5 or later (NFSv4 kernel support required)
@@ -21,22 +43,8 @@ terminal commands every session.
 
 ## Install (pre-built .hpkg)
 
-The easiest path — grab the .hpkg from the
-[Releases](https://github.com/KevinAdams05/HaikuTools/releases) page and drop
-it into Haiku's package watch directory:
-
-```sh
-# user-only install
-cp nfsmount-*.hpkg ~/config/non-packaged/packages/
-
-# or system-wide install
-cp nfsmount-*.hpkg /boot/system/non-packaged/packages/
-```
-
-The package daemon picks it up immediately. NFSMount appears in the Deskbar
-under Applications.
-
-To uninstall, just delete the .hpkg from the same directory.
+The easiest way is to grab the .hpkg from the
+[Releases](https://github.com/KevinAdams05/HaikuTools/releases) and double click it, and a Haiku Depot window should open and let you install the application.
 
 ## Build from source
 

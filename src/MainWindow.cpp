@@ -156,11 +156,10 @@ MainWindow::QuitRequested()
 	fSettings->SetWindowFrame(Frame());
 	fSettings->Save();
 
-	// Update auto-mount launch script
-	if (fSettings->HasAutoMountShares())
-		ShareManager::InstallAutoMount();
-	else
-		ShareManager::RemoveAutoMount();
+	// The auto-mount launch_daemon job is now installed once at
+	// app startup (App::ReadyToRun → ShareManager::InstallLaunchJob)
+	// and stays installed permanently; per-share autoMount flags
+	// gate which shares it acts on. No install/remove needed here.
 
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	return true;
@@ -513,12 +512,6 @@ MainWindow::_HandleShareSaved(BMessage* message)
 
 	fSettings->Save();
 
-	// Update auto-mount launch script
-	if (fSettings->HasAutoMountShares())
-		ShareManager::InstallAutoMount();
-	else
-		ShareManager::RemoveAutoMount();
-
 	_LoadShares();
 	_UpdateButtons();
 	_SetStatus(index >= 0 ? "Share updated." : "Share added.");
@@ -631,11 +624,6 @@ MainWindow::_HandleImportExport(BMessage* message)
 	}
 
 	fSettings->Save();
-
-	// Update auto-mount launch script in case any imported share
-	// has auto-mount enabled.
-	if (fSettings->HasAutoMountShares())
-		ShareManager::InstallAutoMount();
 
 	_LoadShares();
 	_UpdateButtons();

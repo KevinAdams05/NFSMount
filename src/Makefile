@@ -34,7 +34,7 @@ RSRCS =
 #   be            - libbe.so (core Haiku/BeOS API)
 #   columnlistview - BColumnListView / BColumnTypes
 #   tracker       - Tracker API (for shared headers)
-LIBS = be columnlistview tracker localestub
+LIBS = be columnlistview tracker localestub $(STDCPPLIBS)
 
 # Additional paths for header files
 LOCAL_INCLUDE_PATHS =

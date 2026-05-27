@@ -23,8 +23,14 @@ public:
 	static	BString				BuildV4ParameterString(
 									const BMessage* share);
 	static	status_t			CreateMountPoint(const char* path);
-	static	status_t			InstallAutoMount();
-	static	status_t			RemoveAutoMount();
+
+	// Writes the launch_daemon job file at
+	// ~/config/settings/launch/user/NFSMount and removes the legacy
+	// boot/launch/NFSMount shell script if present. Safe to call on
+	// every app launch — idempotent. The job runs NFSMount --auto when
+	// the network becomes available, which mounts every share whose
+	// per-share autoMount flag is set.
+	static	status_t			InstallLaunchJob();
 };
 
 

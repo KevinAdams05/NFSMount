@@ -31,8 +31,6 @@ public:
 									const BMessage* share);
 			status_t			RemoveShare(int32 index);
 
-			bool				HasAutoMountShares() const;
-
 private:
 			BMessage			fSettings;
 			BPath				fSettingsPath;

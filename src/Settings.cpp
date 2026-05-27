@@ -121,20 +121,3 @@ Settings::RemoveShare(int32 index)
 {
 	return fSettings.RemoveData(kFieldShares, index);
 }
-
-
-bool
-Settings::HasAutoMountShares() const
-{
-	int32 count = CountShares();
-	for (int32 i = 0; i < count; i++) {
-		BMessage share;
-		if (fSettings.FindMessage(kFieldShares, i, &share) == B_OK) {
-			bool autoMount = false;
-			share.FindBool(kFieldAutoMount, &autoMount);
-			if (autoMount)
-				return true;
-		}
-	}
-	return false;
-}

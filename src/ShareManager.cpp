@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <syslog.h>
+#include <unistd.h>
 
 #include <Alert.h>
 #include <Application.h>
@@ -16,11 +18,53 @@
 #include <Entry.h>
 #include <File.h>
 #include <FindDirectory.h>
+#include <OS.h>
 #include <Path.h>
 #include <Roster.h>
+#include <image.h>
 #include <fs_volume.h>
 
 #include "Constants.h"
+
+
+// The Haiku NFSv4 kernel add-on requires the nfs4_idmapper_server userspace
+// daemon to be running before it can complete a mount — without it, the
+// driver fails to initialize its RPCServerManager and fs_mount_volume
+// returns B_NAME_NOT_FOUND. Haiku does not auto-start the idmapper from
+// any default launch_daemon configuration, so a fresh-boot machine with no
+// prior NFSv4 mount has no idmapper running and every mount fails until
+// it's manually started. We start it here, just-in-time, the first time
+// any NFSv4 mount is attempted within this NFSMount process.
+static void
+EnsureIdmapperRunning()
+{
+	// `find_thread` looks up a thread by name; the main thread of a Haiku
+	// team is named after the executable's basename, so this finds the
+	// idmapper if any instance of it is running anywhere on the system.
+	if (find_thread("nfs4_idmapper_server") >= 0)
+		return;
+
+	const char* path = "/system/servers/nfs4_idmapper_server";
+	const char* argv[] = { path, NULL };
+	thread_id team = load_image(1, argv, const_cast<const char**>(environ));
+	if (team < 0) {
+		syslog(LOG_WARNING,
+			"NFSMount: failed to start nfs4_idmapper_server: %s — "
+			"NFSv4 mounts may fail with \"Name not found\"",
+			strerror(team));
+		return;
+	}
+
+	resume_thread(team);
+	// Give the daemon a moment to bind its IPC ports before the first
+	// mount attempt races it. Without this delay, the kernel nfs4 driver
+	// can still see RPCServerManager as unacquired and fail the mount.
+	snooze(500000); // 500 ms
+
+	syslog(LOG_INFO,
+		"NFSMount: started nfs4_idmapper_server (team %" B_PRId32 ")",
+		team);
+}
 
 
 status_t
@@ -58,6 +102,15 @@ ShareManager::Mount(const BMessage* share)
 	share->FindInt32(kFieldNFSVersion, &nfsVersion);
 	const char* fsName = nfsVersion == kNFSVersion4
 		? kNFS4FileSystem : kNFSFileSystem;
+
+	syslog(LOG_INFO,
+		"NFSMount: Mount() nfsVersion=%" B_PRId32 " fsName=%s params=%s",
+		nfsVersion, fsName, params.String());
+
+	// NFSv4 needs the idmapper running; start it on demand. Safe to call
+	// repeatedly — only does work the first time.
+	if (nfsVersion == kNFSVersion4)
+		EnsureIdmapperRunning();
 
 	// Mount via the kernel API
 	dev_t device = fs_mount_volume(mountPoint.String(), NULL,
@@ -271,57 +324,68 @@ ShareManager::CreateMountPoint(const char* path)
 
 
 status_t
-ShareManager::InstallAutoMount()
+ShareManager::InstallLaunchJob()
 {
-	// Find the launch directory
-	BPath launchPath;
-	find_directory(B_USER_SETTINGS_DIRECTORY, &launchPath);
-	launchPath.Append("boot/launch");
+	// Resolve our own absolute executable path. The launch_daemon job
+	// file embeds it so the daemon can find NFSMount even if no global
+	// PATH entry would resolve the binary at boot time.
+	app_info appInfo;
+	if (be_app->GetAppInfo(&appInfo) != B_OK)
+		return B_ERROR;
+	BPath appPath(&appInfo.ref);
 
-	// Create the directory if needed
-	status_t result = create_directory(launchPath.Path(), 0755);
+	// Escape any spaces in the path so the launch_daemon's parser
+	// reads the whole thing as a single argument (the parser splits on
+	// unescaped whitespace and the example in /system/data/user_launch
+	// uses backslash-escaped spaces for the same reason).
+	BString escapedAppPath(appPath.Path());
+	escapedAppPath.ReplaceAll(" ", "\\ ");
+
+	// Find ~/config/settings/launch/user/ and ensure it exists.
+	BPath launchDir;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &launchDir) != B_OK)
+		return B_ERROR;
+	launchDir.Append("launch/user");
+	status_t result = create_directory(launchDir.Path(), 0755);
 	if (result != B_OK)
 		return result;
 
-	launchPath.Append(kLaunchScriptName);
+	// Write the job file. Job name kept short ("x-vnd.NFSMount-automount")
+	// so it's easy to target with `launch_roster start <name>` for
+	// manual testing.
+	BPath jobPath(launchDir);
+	jobPath.Append(kLaunchScriptName);
 
-	// Get our own executable path
-	app_info appInfo;
-	be_app->GetAppInfo(&appInfo);
-	BPath appPath(&appInfo.ref);
-
-	// Write the launch script
-	BFile file(launchPath.Path(),
-		B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	BFile file(jobPath.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
 	result = file.InitCheck();
 	if (result != B_OK)
 		return result;
 
-	BString script;
-	script.SetToFormat("#!/bin/sh\n\"%s\" --auto\n", appPath.Path());
-	ssize_t written = file.Write(script.String(), script.Length());
+	BString job;
+	job.SetToFormat(
+		"job x-vnd.NFSMount-automount {\n"
+		"\tlaunch %s --auto\n"
+		"\ton network_available\n"
+		"}\n",
+		escapedAppPath.String());
+	ssize_t written = file.Write(job.String(), job.Length());
 	if (written < 0)
 		return (status_t)written;
 
-	// Make executable
-	mode_t permissions = 0755;
-	file.SetPermissions(permissions);
+	// Migration: remove the legacy boot/launch/NFSMount shell script
+	// from earlier NFSMount versions. Older installs used a script
+	// that ran during user-session startup with no way to wait for
+	// the network — this is what made auto-mount unreliable on
+	// slower-to-respond NFS servers (e.g. UnRAID). The new
+	// launch_daemon job above gates on `network_available` instead.
+	BPath legacyPath;
+	if (find_directory(B_USER_SETTINGS_DIRECTORY, &legacyPath) == B_OK) {
+		legacyPath.Append("boot/launch");
+		legacyPath.Append(kLaunchScriptName);
+		BEntry legacy(legacyPath.Path());
+		if (legacy.Exists())
+			legacy.Remove();
+	}
 
 	return B_OK;
-}
-
-
-status_t
-ShareManager::RemoveAutoMount()
-{
-	BPath launchPath;
-	find_directory(B_USER_SETTINGS_DIRECTORY, &launchPath);
-	launchPath.Append("boot/launch");
-	launchPath.Append(kLaunchScriptName);
-
-	BEntry entry(launchPath.Path());
-	if (!entry.Exists())
-		return B_OK;
-
-	return entry.Remove();
 }

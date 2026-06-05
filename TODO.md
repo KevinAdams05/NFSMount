@@ -2,7 +2,7 @@
 
 ## Bugs
 
-- [ ] **Auto-mount still fails intermittently at boot — the 0.0.5-4
+- [x] **Auto-mount still fails intermittently at boot — the 0.0.5-4
   `EnsureIdmapperRunning()` 500 ms snooze is not always enough.**
   Observed 2026-06-04 on the bare-metal test box, two consecutive
   boots, running 0.0.5-4 (which contains the idmapper auto-start fix):
@@ -25,6 +25,11 @@
   auto-mount when an address arrives — also covers cable-replug.
   Syslog signature to test against: `started nfs4_idmapper_server`
   followed within ~1 s by `Unable to Acquire RPCServerManager!`.
+  **FIXED in 0.1.0 (2026-06-05):** root cause was network-not-ready
+  (the idmapper theory was overturned — the kernel spawns the daemon
+  itself). Fixed with `_WaitForNetwork()` + up-to-3 retry passes;
+  verified on hardware with the race reproduced live (launch_daemon
+  fired mid-DHCP, wait held 2 s, mount succeeded first try).
 
 ## Pending
 
@@ -47,5 +52,5 @@
 - [ ] **Server discovery** — mDNS/Bonjour browsing for NFS servers on the
   local network.
 
-- [ ] **Mount point browsing** — a file panel for selecting the local mount
-  point instead of typing a path.
+- [x] **Mount point browsing** — done 2026-06-05 (0.1.0): "Browse…"
+  button on the Edit Share window opens a directory-only BFilePanel.

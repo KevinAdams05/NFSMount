@@ -11,8 +11,11 @@
 #include <string.h>
 
 #include <Alert.h>
+#include <Entry.h>
 #include <GroupView.h>
 #include <LayoutBuilder.h>
+#include <Messenger.h>
+#include <Path.h>
 #include <MenuItem.h>
 #include <PopUpMenu.h>
 #include <SeparatorView.h>
@@ -37,6 +40,8 @@ EditShareWindow::EditShareWindow(BRect frame, BWindow* target,
 	fServerField(NULL),
 	fExportField(NULL),
 	fMountPointField(NULL),
+	fBrowseButton(NULL),
+	fMountPointPanel(NULL),
 	fReadOnlyBox(NULL),
 	fAutoMountBox(NULL),
 	fSoftRadio(NULL),
@@ -68,6 +73,7 @@ EditShareWindow::EditShareWindow(BRect frame, BWindow* target,
 
 EditShareWindow::~EditShareWindow()
 {
+	delete fMountPointPanel;
 }
 
 
@@ -86,6 +92,47 @@ EditShareWindow::MessageReceived(BMessage* message)
 		case kMsgVersionChanged:
 			_UpdateVersionUI();
 			break;
+
+		case kMsgBrowseMountPoint:
+		{
+			// Lazily create the directory-only panel; reuse it across
+			// repeated Browse clicks so it remembers its location.
+			if (fMountPointPanel == NULL) {
+				BMessenger target(this);
+				BMessage selected(kMsgMountPointSelected);
+				fMountPointPanel = new BFilePanel(B_OPEN_PANEL, &target,
+					NULL, B_DIRECTORY_NODE, false, &selected, NULL,
+					true);
+				fMountPointPanel->Window()->SetTitle(
+					"NFSMount: Choose mount point");
+				fMountPointPanel->SetButtonLabel(B_DEFAULT_BUTTON,
+					"Select");
+			}
+
+			// Start browsing from the current field content when it
+			// points at an existing directory.
+			BEntry entry(fMountPointField->Text());
+			if (entry.InitCheck() == B_OK && entry.Exists()
+				&& entry.IsDirectory()) {
+				fMountPointPanel->SetPanelDirectory(
+					fMountPointField->Text());
+			}
+
+			fMountPointPanel->Show();
+			break;
+		}
+
+		case kMsgMountPointSelected:
+		{
+			entry_ref ref;
+			if (message->FindRef("refs", &ref) != B_OK)
+				break;
+
+			BPath path(&ref);
+			if (path.InitCheck() == B_OK)
+				fMountPointField->SetText(path.Path());
+			break;
+		}
 
 		case 'save':
 		{
@@ -137,6 +184,8 @@ EditShareWindow::_BuildLayout()
 		NULL);
 	fMountPointField = new BTextControl("mountpoint", "Mount point:",
 		"/boot/home/", NULL);
+	fBrowseButton = new BButton("browse", "Browse" B_UTF8_ELLIPSIS,
+		new BMessage(kMsgBrowseMountPoint));
 	fReadOnlyBox = new BCheckBox("readonly", "Read only", NULL);
 	fAutoMountBox = new BCheckBox("automount",
 		"Mount automatically at login", NULL);
@@ -159,6 +208,7 @@ EditShareWindow::_BuildLayout()
 			.AddTextControl(fServerField, 0, 1)
 			.AddTextControl(fExportField, 0, 2)
 			.AddTextControl(fMountPointField, 0, 3)
+			.Add(fBrowseButton, 2, 3)
 			.SetColumnWeight(1, 10.0f)
 		.End()
 		.Add(fReadOnlyBox)

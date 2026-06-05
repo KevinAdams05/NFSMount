@@ -25,6 +25,8 @@ public:
 
 private:
 			void				_AutoMount();
+			bool				_WaitForNetwork(bigtime_t timeout);
+			int32				_AutoMountPass(BString& errors);
 
 			Settings			fSettings;
 			bool				fAutoMode;

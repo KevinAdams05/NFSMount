@@ -27,44 +27,15 @@
 #include "Constants.h"
 
 
-// The Haiku NFSv4 kernel add-on requires the nfs4_idmapper_server userspace
-// daemon to be running before it can complete a mount — without it, the
-// driver fails to initialize its RPCServerManager and fs_mount_volume
-// returns B_NAME_NOT_FOUND. Haiku does not auto-start the idmapper from
-// any default launch_daemon configuration, so a fresh-boot machine with no
-// prior NFSv4 mount has no idmapper running and every mount fails until
-// it's manually started. We start it here, just-in-time, the first time
-// any NFSv4 mount is attempted within this NFSMount process.
-static void
-EnsureIdmapperRunning()
-{
-	// `find_thread` looks up a thread by name; the main thread of a Haiku
-	// team is named after the executable's basename, so this finds the
-	// idmapper if any instance of it is running anywhere on the system.
-	if (find_thread("nfs4_idmapper_server") >= 0)
-		return;
-
-	const char* path = "/system/servers/nfs4_idmapper_server";
-	const char* argv[] = { path, NULL };
-	thread_id team = load_image(1, argv, const_cast<const char**>(environ));
-	if (team < 0) {
-		syslog(LOG_WARNING,
-			"NFSMount: failed to start nfs4_idmapper_server: %s — "
-			"NFSv4 mounts may fail with \"Name not found\"",
-			strerror(team));
-		return;
-	}
-
-	resume_thread(team);
-	// Give the daemon a moment to bind its IPC ports before the first
-	// mount attempt races it. Without this delay, the kernel nfs4 driver
-	// can still see RPCServerManager as unacquired and fail the mount.
-	snooze(500000); // 500 ms
-
-	syslog(LOG_INFO,
-		"NFSMount: started nfs4_idmapper_server (team %" B_PRId32 ")",
-		team);
-}
+// Note on the nfs4_idmapper_server: versions 0.0.5-2 through 0.0.5-4
+// started the idmapper daemon from here before NFSv4 mounts, believing
+// Haiku never auto-starts it. That was wrong — the nfs4 kernel add-on
+// itself creates the idmapper IPC ports and spawns the daemon as a
+// system team during mount (IdMap::_Repair() in the Haiku source), so
+// a userland-started instance just finds no ports and exits. The
+// "Name not found" mount failures that motivated it were actually the
+// network-not-ready race, now handled by _WaitForNetwork() and the
+// retry passes in App.cpp.
 
 
 status_t
@@ -106,11 +77,6 @@ ShareManager::Mount(const BMessage* share)
 	syslog(LOG_INFO,
 		"NFSMount: Mount() nfsVersion=%" B_PRId32 " fsName=%s params=%s",
 		nfsVersion, fsName, params.String());
-
-	// NFSv4 needs the idmapper running; start it on demand. Safe to call
-	// repeatedly — only does work the first time.
-	if (nfsVersion == kNFSVersion4)
-		EnsureIdmapperRunning();
 
 	// Mount via the kernel API
 	dev_t device = fs_mount_volume(mountPoint.String(), NULL,

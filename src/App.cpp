@@ -11,6 +11,8 @@
 #include <syslog.h>
 
 #include <Alert.h>
+#include <NetworkInterface.h>
+#include <NetworkRoster.h>
 #include <String.h>
 
 #include "AboutBox.h"
@@ -77,15 +79,69 @@ NFSMountApp::QuitRequested()
 }
 
 
-void
-NFSMountApp::_AutoMount()
+/*! Wait until at least one non-loopback interface has a configured
+	address, up to `timeout`. launch_daemon's `network_available` event
+	can fire before DHCP has actually acquired a lease (observed
+	2026-06-04: two consecutive boots auto-mounted while DHCP_DISCOVER
+	was still unanswered, and the nfs4 add-on's RPC connect failed with
+	B_NAME_NOT_FOUND). Polling here closes that gap for the common
+	case; the retry passes in _AutoMount() cover anything that slips
+	through. Returns true if the network came up within the timeout. */
+bool
+NFSMountApp::_WaitForNetwork(bigtime_t timeout)
+{
+	const bigtime_t kStep = 1000000;
+		// 1 s between checks
+	bigtime_t waited = 0;
+
+	while (true) {
+		BNetworkRoster& roster = BNetworkRoster::Default();
+		BNetworkInterface interface;
+		uint32 cookie = 0;
+		while (roster.GetNextInterface(&cookie, interface) == B_OK) {
+			if ((interface.Flags() & IFF_LOOPBACK) != 0
+				|| (interface.Flags() & IFF_UP) == 0) {
+				continue;
+			}
+
+			int32 count = interface.CountAddresses();
+			for (int32 i = 0; i < count; i++) {
+				BNetworkInterfaceAddress address;
+				if (interface.GetAddressAt(i, address) != B_OK)
+					continue;
+				if (!address.Address().IsEmpty()) {
+					if (waited > 0) {
+						syslog(LOG_INFO, "NFSMount: network became "
+							"available after %" B_PRIdBIGTIME " s",
+							waited / 1000000);
+					}
+					return true;
+				}
+			}
+		}
+
+		if (waited >= timeout)
+			break;
+		snooze(kStep);
+		waited += kStep;
+	}
+
+	syslog(LOG_WARNING, "NFSMount: no configured network interface "
+		"after %" B_PRIdBIGTIME " s — attempting mounts anyway",
+		timeout / 1000000);
+	return false;
+}
+
+
+/*! One pass over all auto-mount shares. Returns the number of shares
+	that failed with a *retryable* error (network/server not reachable
+	yet); permanent errors (bad configuration etc.) are logged but not
+	counted, so the caller doesn't waste retry passes on them. */
+int32
+NFSMountApp::_AutoMountPass(BString& errors)
 {
 	int32 count = fSettings.CountShares();
-	int32 mounted = 0;
-	int32 failed = 0;
-	BString errors;
-
-	syslog(LOG_INFO, "NFSMount: auto-mount starting, %" B_PRId32 " share(s) configured", count);
+	int32 retryable = 0;
 
 	for (int32 i = 0; i < count; i++) {
 		BMessage share;
@@ -103,29 +159,92 @@ NFSMountApp::_AutoMount()
 		BString mountPoint;
 		share.FindString(kFieldMountPoint, &mountPoint);
 
-		// Skip if already mounted
-		if (ShareManager::IsMounted(mountPoint.String())) {
-			syslog(LOG_INFO, "NFSMount: %s already mounted at %s, skipping",
-				name.String(), mountPoint.String());
-			mounted++;
+		// Skip if already mounted (also makes retry passes cheap: every
+		// share that succeeded earlier short-circuits here)
+		if (ShareManager::IsMounted(mountPoint.String()))
 			continue;
-		}
 
 		syslog(LOG_INFO, "NFSMount: mounting %s at %s",
 			name.String(), mountPoint.String());
 		status_t result = ShareManager::Mount(&share);
 		if (result == B_OK) {
-			syslog(LOG_INFO, "NFSMount: %s mounted successfully", name.String());
-			mounted++;
-		} else {
-			syslog(LOG_ERR, "NFSMount: %s failed: %s",
-				name.String(), strerror(result));
-			failed++;
-			BString error;
-			error.SetToFormat("  %s: %s\n", name.String(),
-				strerror(result));
-			errors << error;
+			syslog(LOG_INFO, "NFSMount: %s mounted successfully",
+				name.String());
+			continue;
 		}
+
+		// The errors the nfs4 add-on returns when the server (or the
+		// network, or the idmapper) isn't ready yet — all worth a
+		// retry. Anything else (bad parameters, permission problems)
+		// is permanent and retrying would just waste boot time.
+		bool retry = result == B_NAME_NOT_FOUND
+			|| result == B_TIMED_OUT || result == B_IO_ERROR
+			|| result == ECONNREFUSED || result == ENETUNREACH
+			|| result == EHOSTUNREACH;
+		if (retry)
+			retryable++;
+
+		syslog(LOG_ERR, "NFSMount: %s failed: %s%s", name.String(),
+			strerror(result), retry ? " (will retry)" : "");
+		BString error;
+		error.SetToFormat("  %s: %s\n", name.String(), strerror(result));
+		errors << error;
+	}
+
+	return retryable;
+}
+
+
+void
+NFSMountApp::_AutoMount()
+{
+	int32 count = fSettings.CountShares();
+	BString errors;
+
+	syslog(LOG_INFO, "NFSMount: auto-mount starting, %" B_PRId32
+		" share(s) configured", count);
+
+	// Don't fire mounts into a half-configured network (see
+	// _WaitForNetwork). 30 s covers slow DHCP servers comfortably
+	// while keeping the no-network worst case bounded.
+	_WaitForNetwork(30 * 1000000LL);
+
+	// Up to three passes: the first regular attempt plus two retries,
+	// 5 s apart, for shares that failed with a transient error. This
+	// absorbs whatever the network wait didn't catch — a server that
+	// is itself still booting, or the idmapper losing its startup race
+	// (its 500 ms grace period in EnsureIdmapperRunning is usually,
+	// but not always, enough on a busy boot).
+	const int32 kMaxPasses = 3;
+	for (int32 pass = 1; pass <= kMaxPasses; pass++) {
+		if (pass > 1) {
+			syslog(LOG_INFO, "NFSMount: retry pass %" B_PRId32
+				" of %" B_PRId32, pass, kMaxPasses);
+			snooze(5 * 1000000LL);
+		}
+
+		errors.SetTo("");
+		if (_AutoMountPass(errors) == 0)
+			break;
+	}
+
+	// Final accounting for the syslog
+	int32 mounted = 0;
+	int32 failed = 0;
+	for (int32 i = 0; i < count; i++) {
+		BMessage share;
+		if (fSettings.GetShare(i, &share) != B_OK)
+			continue;
+		bool autoMount = false;
+		share.FindBool(kFieldAutoMount, &autoMount);
+		if (!autoMount)
+			continue;
+		BString mountPoint;
+		share.FindString(kFieldMountPoint, &mountPoint);
+		if (ShareManager::IsMounted(mountPoint.String()))
+			mounted++;
+		else
+			failed++;
 	}
 
 	syslog(LOG_INFO, "NFSMount: auto-mount complete — %" B_PRId32 " mounted, %" B_PRId32 " failed",

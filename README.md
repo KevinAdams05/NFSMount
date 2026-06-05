@@ -1,11 +1,11 @@
 >[!WARNING]
->This is very early alpha code. 
+>This is very beta version code, there may be bugs. 
 >**Bug reports (please attach syslog and/or screenshots) and PRs welcome!**
 
 >[!NOTE]
 >An LLM was used to aid in development of this code.
 
-# NFSMount
+# <img src="resources/NFSMount-icon.svg" alt="Alt Text" height="64"> NFSMount
 
 A native Haiku application for managing NFSv4 network shares. Mount, unmount,
 save, and auto-mount NFS shares through a graphical interface instead of typing
@@ -44,7 +44,7 @@ My test NFS server is  Unraid 6.12.13.
 ## Install (pre-built .hpkg)
 
 The easiest way is to grab the .hpkg from the
-[Releases](https://github.com/KevinAdams05/HaikuTools/releases) and double click it, and a Haiku Depot window should open and let you install the application.
+[Releases](https://github.com/KevinAdams05/NFSMount/releases) and double click it, and a Haiku Depot window should open and let you install the application.
 
 ## Build from source
 
@@ -74,9 +74,6 @@ bash package/build-hpkg.sh
 
 Output: `NFSMount/build/nfsmount-<version>-x86_64.hpkg`.
 
-The `package/build.ps1` Windows wrapper handles the full pipeline (scp source
-to build server, run the cross-build, scp the .hpkg back) for users with the
-build server set up off-host.
 
 ## Usage
 

@@ -1,5 +1,5 @@
 name			nfsmount
-version			0.0.5-1
+version			0.1.0-1
 architecture	x86_64
 summary			"NFS share manager for Haiku"
 

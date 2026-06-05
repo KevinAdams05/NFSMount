@@ -54,6 +54,8 @@ enum {
 	kMsgCheckStatus			= 'chks',
 	kMsgRetryModeChanged	= 'rtmd',
 	kMsgVersionChanged		= 'vrch',
+	kMsgBrowseMountPoint	= 'brmp',
+	kMsgMountPointSelected	= 'mpsl',
 
 	// File menu
 	kMsgImportShares		= 'impt',

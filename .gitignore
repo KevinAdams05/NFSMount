@@ -1,0 +1,7 @@
+# Local working data — downloaded GitHub issue dumps (fetch-github-issue.py)
+Issues/
+
+# Build output
+src/objects*/
+*.rsrc
+*.hpkg

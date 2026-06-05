@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.0] – 2026-06-05
+
+First beta — in daily use for weeks; the alpha label no longer fits.
+
+### Fixed
+
+- **Boot-time auto-mount is now resilient.** Two consecutive
+  fresh-boot failures (2026-06-04) showed launch_daemon's
+  `network_available` event firing before DHCP had configured an
+  address: the nfs4 add-on's RPC connect failed (`Unable to Acquire
+  RPCServerManager!` → `Name not found`) and auto-mount gave up after
+  its single pass. Two new layers fix this:
+  - `_WaitForNetwork()` polls for a configured non-loopback interface
+    address (up to 30 s) before the first mount attempt.
+  - Auto-mount now runs up to three passes, 5 s apart, retrying shares
+    that failed with transient errors (`B_NAME_NOT_FOUND`,
+    `B_TIMED_OUT`, `B_IO_ERROR`, connection-refused/unreachable);
+    permanent errors (bad configuration) are not retried. Already-
+    mounted shares short-circuit, so retry passes are cheap.
+  Diagnosis note: this also overturns the May "idmapper" analysis.
+  Reading the nfs4 kernel add-on shows it creates the idmapper IPC
+  ports **and spawns the daemon itself** as a system team during mount
+  (`IdMap::_Repair()`) — a userland-started instance finds no ports
+  and exits (verified live: our instance died, the kernel's took
+  over). `EnsureIdmapperRunning()` is therefore removed entirely;
+  network readiness was the real culprit all along.
+
+### Added
+
+- **Application icon** — NAS box + shared folder with people glyph +
+  network tee. Designed as `resources/NFSMount-icon.svg`, converted to
+  a 1.4 KB HVIF with hvif-tools' `icon2icon`, embedded via
+  `NFSMount.rdef` resource 101 `'VICN'`. Shows in Tracker, Deskbar,
+  and automatically in the About window (BAboutWindow renders the
+  app's icon resource). Regeneration command documented in the rdef.
+- **Mount-point browse button** — the Edit Share window's mount-point
+  field now has a "Browse…" button opening a directory-only
+  `BFilePanel` (reused across clicks, starts from the current field
+  value when it's an existing directory).
+
+### Changed
+
+- Version bumped 0.0.5 → **0.1.0**, variety alpha → **beta**.
+- `.gitignore` added (local `Issues/` dumps, build outputs).
+
 ## [0.0.5] – 2026-05-04
 
 ### Added

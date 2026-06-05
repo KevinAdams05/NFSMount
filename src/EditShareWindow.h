@@ -9,6 +9,7 @@
 #include <Box.h>
 #include <Button.h>
 #include <CheckBox.h>
+#include <FilePanel.h>
 #include <MenuField.h>
 #include <RadioButton.h>
 #include <TabView.h>
@@ -44,6 +45,8 @@ private:
 			BTextControl*		fServerField;
 			BTextControl*		fExportField;
 			BTextControl*		fMountPointField;
+			BButton*			fBrowseButton;
+			BFilePanel*			fMountPointPanel;
 			BCheckBox*			fReadOnlyBox;
 			BCheckBox*			fAutoMountBox;
 

@@ -11,10 +11,10 @@ resource app_flags B_SINGLE_LAUNCH;
 
 resource app_version {
 	major  = 0,
-	middle = 0,
-	minor  = 5,
+	middle = 1,
+	minor  = 0,
 
-	variety = B_APPV_ALPHA,
+	variety = B_APPV_BETA,
 	internal = 1,
 
 	short_info = "NFSMount",
@@ -26,10 +26,16 @@ resource(1, "BEOS:FILE_TYPES") message {
 };
 
 /*
- * Application icon (HVIF format)
+ * Application icon (HVIF format).
  *
- * TODO: Create an icon using Icon-O-Matic and add it here:
- *   resource(101, "BEOS:ICON") #'VICN' import "NFSMount.hvif";
+ * Design source of truth: resources/NFSMount-icon.svg — a NAS box with
+ * status LEDs, a shared folder with a people glyph, and a network tee.
+ * Regenerate the .hvif from the SVG with hvif-tools (icon2icon):
  *
- * Until then, the app will use the default generic application icon.
+ *   icon2icon resources/NFSMount-icon.svg resources/NFSMount.hvif
+ *
+ * (github.com/threedeyes/hvif-tools; verify by rendering back to PNG
+ * at 64/32/16 px.) Icon-O-Matic can also open the .hvif directly for
+ * LOD-hint tweaks.
  */
+resource(101, "BEOS:ICON") #'VICN' import "../resources/NFSMount.hvif";

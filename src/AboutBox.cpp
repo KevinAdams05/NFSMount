@@ -7,6 +7,11 @@
 #include "AboutBox.h"
 
 #include <AboutWindow.h>
+#include <AppFileInfo.h>
+#include <Application.h>
+#include <File.h>
+#include <Roster.h>
+#include <String.h>
 
 
 // MIT license text — embedded verbatim so the About box is self-
@@ -58,7 +63,25 @@ show_about_window()
 	BAboutWindow* about = new BAboutWindow("NFSMount",
 		"application/x-vnd.NFSMount");
 
-	about->SetVersion("0.0.5");
+	// Pull the version from our own app_version resource (set in
+	// NFSMount.rdef) so the About box can never drift from the actual
+	// release version again — 0.0.5 once shipped hardcoded here while
+	// the rdef said otherwise.
+	BString versionString;
+	app_info appInfo;
+	if (be_app->GetAppInfo(&appInfo) == B_OK) {
+		BFile file(&appInfo.ref, B_READ_ONLY);
+		BAppFileInfo fileInfo(&file);
+		version_info version;
+		if (fileInfo.GetVersionInfo(&version, B_APP_VERSION_KIND)
+				== B_OK) {
+			versionString.SetToFormat("%" B_PRIu32 ".%" B_PRIu32
+				".%" B_PRIu32, version.major, version.middle,
+				version.minor);
+		}
+	}
+	if (!versionString.IsEmpty())
+		about->SetVersion(versionString.String());
 
 	about->AddDescription(
 		"A native Haiku application for managing NFS network shares.\n"

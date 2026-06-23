@@ -16,6 +16,14 @@ public:
 	static	status_t			Mount(const BMessage* share);
 	static	status_t			Unmount(const char* mountPoint);
 	static	bool				IsMounted(const char* mountPoint);
+
+	// Pre-flight reachability probe: a short, bounded TCP connect to the
+	// share's server:port. Used by the boot-time auto-mount path to avoid
+	// handing an unreachable (or not-yet-routable) server to the kernel
+	// nfs/nfs4 add-on, whose mount call has no timeout and can wedge.
+	// Returns true only if the connect succeeds within `timeout`.
+	static	bool				IsServerReachable(const BMessage* share,
+									bigtime_t timeout);
 	static	BString				BuildParameterString(
 									const BMessage* share);
 	static	BString				BuildV2ParameterString(

@@ -11,6 +11,7 @@
 #include <syslog.h>
 
 #include <Alert.h>
+#include <NetworkAddress.h>
 #include <NetworkInterface.h>
 #include <NetworkRoster.h>
 #include <String.h>
@@ -109,7 +110,14 @@ NFSMountApp::_WaitForNetwork(bigtime_t timeout)
 				BNetworkInterfaceAddress address;
 				if (interface.GetAddressAt(i, address) != B_OK)
 					continue;
-				if (!address.Address().IsEmpty()) {
+				// A link-local address (IPv4 169.254/16, IPv6 fe80::/10)
+				// is auto-configured before DHCP hands out a real lease,
+				// so it is not proof the network can route to the NFS
+				// server. Treating it as "ready" is what let mounts fire
+				// into a half-configured network (observed 2026-06-04).
+				// Wait for a routable address instead.
+				const BNetworkAddress& addr = address.Address();
+				if (!addr.IsEmpty() && !addr.IsLinkLocal()) {
 					if (waited > 0) {
 						syslog(LOG_INFO, "NFSMount: network became "
 							"available after %" B_PRIdBIGTIME " s",
@@ -163,6 +171,20 @@ NFSMountApp::_AutoMountPass(BString& errors)
 		// share that succeeded earlier short-circuits here)
 		if (ShareManager::IsMounted(mountPoint.String()))
 			continue;
+
+		// Pre-flight reachability probe. fs_mount_volume() has no timeout,
+		// so handing it an unreachable or not-yet-routable server can wedge
+		// the auto-mount thread (and has taken the machine off the network
+		// at boot). A bounded TCP connect first means we only call the
+		// kernel mount once the server actually answers; otherwise we count
+		// it as retryable and let a later pass try again.
+		const bigtime_t kProbeTimeout = 3 * 1000000LL;
+		if (!ShareManager::IsServerReachable(&share, kProbeTimeout)) {
+			syslog(LOG_INFO, "NFSMount: %s not reachable yet — deferring "
+				"(will retry)", name.String());
+			retryable++;
+			continue;
+		}
 
 		syslog(LOG_INFO, "NFSMount: mounting %s at %s",
 			name.String(), mountPoint.String());

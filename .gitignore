@@ -5,3 +5,7 @@ Issues/
 src/objects*/
 *.rsrc
 *.hpkg
+
+# Local, machine-specific deploy/test helpers (hardcoded IPs + paths)
+package/build-nfsmount-on-shredder.sh
+package/deploy-nfsmount.sh

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.1] – Unreleased
+## [0.1.1] – 2026-06-30
 
 Hardens boot-time auto-mount further: the 0.1.0 retry/backoff only helped
 when the kernel mount *returned*. A server that was unreachable at boot

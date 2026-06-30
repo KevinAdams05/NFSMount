@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] – 2026-06-30
+
+Hardens boot-time auto-mount further: the 0.1.0 retry/backoff only helped
+when the kernel mount *returned*. A server that was unreachable at boot
+could hang `fs_mount_volume()` (which has no timeout), wedging the
+auto-mount thread and, in the worst case, leaving the machine off the
+network after boot.
+
+### Fixed
+
+- **Pre-flight reachability probe before mounting.** Auto-mount now does a
+  short, bounded (3 s) TCP connect to each share's `server:port` before
+  calling the kernel mount. An unreachable or not-yet-routable server is
+  deferred to a later retry pass instead of being handed to the nfs/nfs4
+  add-on, so a down server can no longer wedge the boot-time auto-mount.
+- **`_WaitForNetwork()` now ignores link-local addresses.** A link-local
+  address (IPv4 169.254/16, IPv6 fe80::/10) is auto-configured before DHCP
+  hands out a real lease, so it is no longer treated as "network ready";
+  the wait holds out for a routable address. This removes the remaining
+  window where mounts could fire into a half-configured network.
+
+---
+
 ## [0.1.0] – 2026-06-05
 
 First beta — in daily use for weeks; the alpha label no longer fits.

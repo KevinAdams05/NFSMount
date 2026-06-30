@@ -102,6 +102,7 @@ INCLUDES=(
 	-I"$HAIKU_HEADERS/os"
 	-I"$HAIKU_HEADERS/os/app"
 	-I"$HAIKU_HEADERS/os/interface"
+	-I"$HAIKU_HEADERS/os/net"
 	-I"$HAIKU_HEADERS/os/locale"
 	-I"$HAIKU_HEADERS/os/storage"
 	-I"$HAIKU_HEADERS/os/support"
@@ -142,7 +143,7 @@ echo "==> Linking..."
 	-Wl,-rpath-link,"$HAIKU_RUNTIME_LIB" \
 	-Wl,-rpath-link,"$GCC_SYSLIBS" \
 	-shared-libgcc \
-	-lbe -ltracker -lroot -lstdc++ -lgcc_s \
+	-lbe -lbnetapi -lnetwork -ltracker -lroot -lstdc++ -lgcc_s \
 	"$HAIKU_DEVEL_LIB/libcolumnlistview.a" \
 	"$HAIKU_DEVEL_LIB/liblocalestub.a" \
 	-o "$BUILD/NFSMount"

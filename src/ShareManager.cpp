@@ -18,9 +18,11 @@
 #include <Entry.h>
 #include <File.h>
 #include <FindDirectory.h>
+#include <NetworkAddress.h>
 #include <OS.h>
 #include <Path.h>
 #include <Roster.h>
+#include <Socket.h>
 #include <image.h>
 #include <fs_volume.h>
 
@@ -133,6 +135,38 @@ ShareManager::IsMounted(const char* mountPoint)
 		return false;
 
 	return mountStat.st_dev != parentStat.st_dev;
+}
+
+
+bool
+ShareManager::IsServerReachable(const BMessage* share, bigtime_t timeout)
+{
+	if (share == NULL)
+		return false;
+
+	BString server;
+	share->FindString(kFieldServer, &server);
+	if (server.IsEmpty())
+		return false;
+
+	int32 port = kDefaultPort;
+	share->FindInt32(kFieldPort, &port);
+
+	// Resolve server:port. For an IP literal this is instant; for a
+	// hostname it goes through the resolver (which has its own timeout).
+	// A resolution failure at boot — DNS not up yet — counts as "not
+	// reachable", which the caller treats as retryable.
+	BNetworkAddress address;
+	if (address.SetTo(server.String(), (uint16)port) != B_OK)
+		return false;
+
+	// Bounded TCP connect. BSocket::Connect honors the timeout, so unlike
+	// fs_mount_volume() this cannot block the auto-mount thread forever.
+	BSocket socket;
+	status_t result = socket.Connect(address, timeout);
+	socket.Disconnect();
+
+	return result == B_OK;
 }
 
 

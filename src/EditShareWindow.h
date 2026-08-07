@@ -35,9 +35,19 @@ private:
 			bool				_ValidateFields();
 			BMessage*			_BuildShareMessage();
 			void				_UpdateVersionUI();
+			void				_StartExportBrowse();
+			void				_ShowExportResults(BMessage* message);
+
+	// Worker that asks the server for its export list. Runs off the window
+	// thread because a firewalled or unresponsive server can take the full
+	// timeout to fail, and the window must stay responsive meanwhile.
+	static	int32				_ExportBrowseThread(void* data);
 
 			BWindow*			fTarget;
 			int32				fEditIndex;
+
+			// Guards against a second Browse while one is in flight.
+			thread_id			fExportBrowseThread;
 
 			// Basic fields
 			BMenuField*			fVersionField;
@@ -46,6 +56,7 @@ private:
 			BTextControl*		fExportField;
 			BTextControl*		fMountPointField;
 			BButton*			fBrowseButton;
+			BButton*			fBrowseExportsButton;
 			BFilePanel*			fMountPointPanel;
 			BCheckBox*			fReadOnlyBox;
 			BCheckBox*			fAutoMountBox;

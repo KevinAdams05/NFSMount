@@ -18,6 +18,9 @@ SRCS = \
 	App.cpp \
 	Constants.cpp \
 	EditShareWindow.cpp \
+	ExportBrowser.cpp \
+	ExportListWindow.cpp \
+	ExportProtocol.cpp \
 	ImportExport.cpp \
 	MainWindow.cpp \
 	Settings.cpp \

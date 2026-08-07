@@ -36,6 +36,11 @@ static const int32 kDefaultDirTime = 5;
 static const int32 kDefaultUID = 0;
 static const int32 kDefaultGID = 0;
 
+// How long each step of a share-browse RPC may take (microseconds).
+// Long enough for a busy NAS to answer, short enough that a firewalled
+// host does not leave the Browse button disabled for ages.
+static const bigtime_t kExportBrowseTimeout = 5000000;
+
 // Mount status check interval (microseconds) -- every 10 seconds
 static const bigtime_t kStatusCheckInterval = 10000000;
 
@@ -56,6 +61,13 @@ enum {
 	kMsgVersionChanged		= 'vrch',
 	kMsgBrowseMountPoint	= 'brmp',
 	kMsgMountPointSelected	= 'mpsl',
+
+	// Server share browsing (MOUNT protocol EXPORT)
+	kMsgBrowseExports		= 'brex',
+	kMsgExportsFetched		= 'exfd',
+	kMsgExportSelected		= 'exsl',
+	kMsgExportListSelection	= 'exls',
+	kMsgExportListInvoked	= 'exli',
 
 	// File menu
 	kMsgImportShares		= 'impt',
@@ -102,6 +114,11 @@ extern const char* const kFieldNFSVersion;
 extern const char* const kFieldHostname;
 extern const char* const kFieldUID;
 extern const char* const kFieldGID;
+
+// Fields used by the share-browsing messages
+extern const char* const kFieldExportPath;
+extern const char* const kFieldExportClients;
+extern const char* const kFieldExportStatus;
 
 // Auto-mount launch script name
 extern const char* const kLaunchScriptName;

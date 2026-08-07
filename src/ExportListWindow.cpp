@@ -14,7 +14,6 @@
 #include <LayoutBuilder.h>
 #include <ListItem.h>
 #include <ListView.h>
-#include <Screen.h>
 #include <ScrollView.h>
 #include <String.h>
 #include <StringView.h>
@@ -87,7 +86,10 @@ ExportListWindow::ExportListWindow(BWindow* parent, const char* server,
 		.End();
 
 	SetDefaultButton(fSelectButton);
-	CenterIn(parent != NULL ? parent->Frame() : BScreen().Frame());
+	if (parent != NULL)
+		CenterIn(parent->Frame());
+	else
+		CenterOnScreen();
 }
 
 

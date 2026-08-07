@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] – unreleased
+
+### Added
+
+- **Browse a server's exported shares.** The Edit Share window has a
+  "Browse…" button next to the Export path field. It asks the server which
+  file systems it exports and offers them in a list, so the path no longer
+  has to be typed from memory.
+
+  This speaks the MOUNT protocol directly — the same query `showmount -e`
+  makes: a portmap `GETPORT` lookup for the MOUNT program, then
+  `MOUNTPROC3_EXPORT` (RFC 1813 Appendix I), falling back to MOUNT version 1
+  when a server registers only that. No new runtime dependency.
+
+  The query runs on its own thread with a bounded timeout, so an
+  unreachable or firewalled server cannot wedge the window the way an
+  unbounded `fs_mount_volume()` can.
+
+  Note the MOUNT protocol belongs to NFS v2/v3. A server speaking only
+  NFSv4 need not run rpcbind or mountd at all; in that case the browse
+  reports that the server offers no MOUNT service and the path must be
+  entered by hand. The button works regardless of which NFS version the
+  share itself is configured for, because it asks mountd rather than the
+  NFS server.
+
+---
+
 ## [0.1.1] – 2026-06-30
 
 Hardens boot-time auto-mount further: the 0.1.0 retry/backoff only helped

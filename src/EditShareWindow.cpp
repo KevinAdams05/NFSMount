@@ -23,6 +23,8 @@
 #include <StringView.h>
 
 #include "Constants.h"
+#include "ExportBrowser.h"
+#include "ExportListWindow.h"
 
 
 EditShareWindow::EditShareWindow(BRect frame, BWindow* target,
@@ -35,12 +37,14 @@ EditShareWindow::EditShareWindow(BRect frame, BWindow* target,
 			| B_CLOSE_ON_ESCAPE),
 	fTarget(target),
 	fEditIndex(index),
+	fExportBrowseThread(-1),
 	fVersionField(NULL),
 	fNameField(NULL),
 	fServerField(NULL),
 	fExportField(NULL),
 	fMountPointField(NULL),
 	fBrowseButton(NULL),
+	fBrowseExportsButton(NULL),
 	fMountPointPanel(NULL),
 	fReadOnlyBox(NULL),
 	fAutoMountBox(NULL),
@@ -92,6 +96,22 @@ EditShareWindow::MessageReceived(BMessage* message)
 		case kMsgVersionChanged:
 			_UpdateVersionUI();
 			break;
+
+		case kMsgBrowseExports:
+			_StartExportBrowse();
+			break;
+
+		case kMsgExportsFetched:
+			_ShowExportResults(message);
+			break;
+
+		case kMsgExportSelected:
+		{
+			const char* path = NULL;
+			if (message->FindString(kFieldExportPath, &path) == B_OK)
+				fExportField->SetText(path);
+			break;
+		}
 
 		case kMsgBrowseMountPoint:
 		{
@@ -184,6 +204,8 @@ EditShareWindow::_BuildLayout()
 		NULL);
 	fMountPointField = new BTextControl("mountpoint", "Mount point:",
 		"/boot/home/", NULL);
+	fBrowseExportsButton = new BButton("browseexports",
+		"Browse" B_UTF8_ELLIPSIS, new BMessage(kMsgBrowseExports));
 	fBrowseButton = new BButton("browse", "Browse" B_UTF8_ELLIPSIS,
 		new BMessage(kMsgBrowseMountPoint));
 	fReadOnlyBox = new BCheckBox("readonly", "Read only", NULL);
@@ -207,6 +229,7 @@ EditShareWindow::_BuildLayout()
 			.AddTextControl(fNameField, 0, 0)
 			.AddTextControl(fServerField, 0, 1)
 			.AddTextControl(fExportField, 0, 2)
+			.Add(fBrowseExportsButton, 2, 2)
 			.AddTextControl(fMountPointField, 0, 3)
 			.Add(fBrowseButton, 2, 3)
 			.SetColumnWeight(1, 10.0f)
@@ -596,4 +619,111 @@ EditShareWindow::_UpdateVersionUI()
 	// content they're typing into doesn't vanish underneath them.
 	if (fTabs->Selection() != 0)
 		fTabs->Select(0);
+}
+
+
+/*!	Kicks off a background query for the server's export list.
+
+	The MOUNT protocol call can take the full timeout to fail against a
+	firewalled or unresponsive host, so it runs on its own thread. The
+	button is disabled meanwhile, which also prevents a second overlapping
+	query.
+*/
+void
+EditShareWindow::_StartExportBrowse()
+{
+	if (fExportBrowseThread >= 0)
+		return;
+
+	BString server(fServerField->Text());
+	server.Trim();
+	if (server.IsEmpty()) {
+		BAlert* alert = new BAlert("NFSMount",
+			ExportBrowser::ErrorString(B_BAD_VALUE).String(), "OK");
+		alert->SetFlags(alert->Flags() | B_CLOSE_ON_ESCAPE);
+		alert->Go(NULL);
+		fServerField->MakeFocus(true);
+		return;
+	}
+
+	// Handed to the worker, which owns it from here on.
+	BMessage* request = new BMessage();
+	request->AddString(kFieldServer, server);
+	request->AddMessenger("target", BMessenger(this));
+
+	fExportBrowseThread = spawn_thread(_ExportBrowseThread,
+		"nfs export browse", B_NORMAL_PRIORITY, request);
+	if (fExportBrowseThread < 0) {
+		delete request;
+		fExportBrowseThread = -1;
+		return;
+	}
+
+	fBrowseExportsButton->SetEnabled(false);
+	fBrowseExportsButton->SetLabel("Browsing" B_UTF8_ELLIPSIS);
+	resume_thread(fExportBrowseThread);
+}
+
+
+/*!	Worker thread: performs the RPC and posts the outcome back.
+
+	Never touches the window directly -- everything returns through a
+	message, so the window may be closed while this is still running
+	without leaving a dangling pointer.
+*/
+int32
+EditShareWindow::_ExportBrowseThread(void* data)
+{
+	BMessage* request = static_cast<BMessage*>(data);
+
+	BString server;
+	BMessenger target;
+	request->FindString(kFieldServer, &server);
+	request->FindMessenger("target", &target);
+	delete request;
+
+	NFSExportList exports;
+	status_t status = ExportBrowser::Fetch(server.String(),
+		kExportBrowseTimeout, exports);
+
+	BMessage reply(kMsgExportsFetched);
+	reply.AddInt32(kFieldExportStatus, (int32)status);
+	reply.AddString(kFieldServer, server);
+
+	for (int32 i = 0; i < exports.CountItems(); i++) {
+		NFSExport* entry = exports.ItemAt(i);
+		reply.AddString(kFieldExportPath, entry->path);
+		reply.AddString(kFieldExportClients, entry->clients);
+	}
+
+	target.SendMessage(&reply);
+	return 0;
+}
+
+
+/*!	Presents whatever the worker came back with. */
+void
+EditShareWindow::_ShowExportResults(BMessage* message)
+{
+	fExportBrowseThread = -1;
+	fBrowseExportsButton->SetLabel("Browse" B_UTF8_ELLIPSIS);
+	fBrowseExportsButton->SetEnabled(true);
+
+	int32 status = B_ERROR;
+	message->FindInt32(kFieldExportStatus, &status);
+
+	if (status != B_OK) {
+		BAlert* alert = new BAlert("NFSMount",
+			ExportBrowser::ErrorString((status_t)status).String(), "OK");
+		alert->SetFlags(alert->Flags() | B_CLOSE_ON_ESCAPE);
+		alert->Go(NULL);
+		return;
+	}
+
+	BString server;
+	message->FindString(kFieldServer, &server);
+
+	ExportListWindow* window = new ExportListWindow(this, server.String(),
+		message, BMessenger(this));
+	window->Show();
 }

@@ -43,6 +43,10 @@ const char* const kFieldHostname = "hostname";
 const char* const kFieldUID = "uid";
 const char* const kFieldGID = "gid";
 
+const char* const kFieldExportPath = "path";
+const char* const kFieldExportClients = "clients";
+const char* const kFieldExportStatus = "status";
+
 // Auto-mount launch script name
 const char* const kLaunchScriptName = "NFSMount";
 

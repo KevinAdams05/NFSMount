@@ -1,5 +1,5 @@
 name			nfsmount
-version			0.1.1-1
+version			0.2.0-1
 architecture	x86_64
 summary			"NFS share manager for Haiku"
 
@@ -12,7 +12,8 @@ Features:
   - Save share configurations persistently across reboots
   - Auto-mount selected shares at login
   - Advanced NFS4 tuning (timeout, retries, cache, port, etc.)
-  - Live status monitoring of external mount/unmount changes"
+  - Live status monitoring of external mount/unmount changes
+  - Browse a server's exported shares instead of typing the path"
 
 packager		"Kevin Adams <kadams@triarcsolutions.com>"
 vendor			"Kevin Adams"
@@ -26,8 +27,8 @@ copyrights {
 }
 
 provides {
-	nfsmount = 0.1.1
-	app:NFSMount = 0.1.1
+	nfsmount = 0.2.0
+	app:NFSMount = 0.2.0
 }
 
 requires {
